@@ -9,6 +9,7 @@ tensorflow = "*"
 networkx = "*"
 streamlit-authenticator = "*"
 pyvis = "*"
+h5py = "*"
 
 [dev-packages]
 
