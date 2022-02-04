@@ -10,6 +10,7 @@ networkx = "*"
 streamlit-authenticator = "*"
 pyvis = "*"
 h5py = "*"
+plotly = "*"
 
 [dev-packages]
 
