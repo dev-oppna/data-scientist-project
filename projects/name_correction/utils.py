@@ -5,15 +5,30 @@ import networkx as nx
 import plotly.graph_objects as go
 from pyvis import network as net
 
-LIST_PANGGILAN = ["bapak", "bapa", "bpk", "ibu", "bu", "mas", "mba", "shop", "sdr", "up ", "sdri", "sdra",
-                 "mang", "kang", "teh"]
+LIST_PANGGILAN = ["bapak", "bapa", "bpk", "ibu", "bu", "mas", "mba", "shop", "sdr", "up", "sdri", "sdra",
+                 "mang", "kang", "teh", "ibuk", "mbak", "saudara", "rt", "mama", "kk", "mamah", "teteh", 
+                 "kakx", "mamih", "ustad", "pdt", "ustadz"]
 
-LIST_NOT_NAME = ["pt ", "ud ", "toko", "shop", "official", "oficial", "manajer", "manager", "kepala", 
-                 "head", "lead", "cv ", "tukang", "poli", "klinik", "store"]
+LIST_NOT_NAME = ["pt", "ud", "toko", "shop", "official", "oficial", "manajer", "manager", "kepala", 
+                 "head", "lead", "cv", "tukang", "poli", "klinik", "store", "alfa", "online",
+                 "kabid", "ketua", "warteg", "motor", "kontrakan", "collection", "rias", "pengantin", "bengkel",
+                 "polisi", "adm ", "rmh", "komplek", "untuk", "warung", "didpn", "hub ", "penerima", "olstore",
+                 "laundry", "brimob", "sekda", "cuci", "kantor", "walikota", "mobil", "cell",
+                 "cellular", "belakang", "depot", "galon", "krupuk", "dapoer", "foto", "copy", "photocopy", 
+                 "collections", "alm", "habib"]
 
 
 def len_group(set_of_group):
     return (len(set_of_group), sum([len(x) for x in set_of_group])/len(set_of_group))
+
+def clear_bin_binti(name):
+    index_bin = name.find(" bin ")
+    index_binti = name.find(" binti ")
+    if index_bin != -1:
+        name = name[:index_bin]
+    elif index_binti != -1:
+        name = name[:index_binti]
+    return name
 
 def clear_name(word):
     if "(" in word:
@@ -22,7 +37,7 @@ def clear_name(word):
         return False
     elif len(word) < 2:
         return False
-    if any(toko in word for toko in LIST_NOT_NAME):
+    if any(toko == word for toko in LIST_NOT_NAME):
         return False
     elif word.isalpha():
         return True
@@ -51,6 +66,8 @@ def strip_name(name):
         name = re.sub('[^a-zA-Z0-9 \n\.]', '', name)
         name = name.strip()
         name = name.lower()
+        # Replace bin and binti
+        name = clear_bin_binti(name)
         if name != "":
             yield name.title()
 
@@ -81,7 +98,10 @@ def get_name(list_name):
         else:
             name = names_to_pick[0]
     conf_level = [y for x,y in dict_similarity.items() if name in x and y > 0.5]
-    conf_level = int(sum(conf_level)/len(conf_level)*100)
+    if len(conf_level) < 1:
+        conf_level = 100/len(list_group)
+    else:
+        conf_level = int(sum(conf_level)/len(conf_level)*100)
     return dict_name[name], G, conf_level
 
 def make_graph(nx_graph):
