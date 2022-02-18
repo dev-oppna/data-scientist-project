@@ -37,7 +37,7 @@ elif projects == "Gender Prediction":
     model = load_models()
 
     st.subheader("Gender Detection")
-    st.write('''Ini adalah model pendeteksian gender dari nama. Model ini ditraining dari 15000 data nama gabungan dari dataset 
+    st.write('''Ini adalah model pendeteksian gender dari nama. Model ini ditraining dari 1 juta data nama gabungan dari dataset 
     nama yang ada di Indonesia maupun di US.''')
     name = st.text_input("Name", key="gender_detection")
 

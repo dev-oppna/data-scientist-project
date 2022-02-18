@@ -4,16 +4,23 @@ import numpy as np
 import plotly.graph_objects as go
 import plotly.express as px
 import pandas as pd
+from Levenshtein import distance as levenshtein_distance
+
+DATA_NAME = pd.read_csv("projects/gender_detection/data_name.csv")
 
 
 def load_models():
     model = load_model('model_gender.h5')
     return model
 
-def preprocess_pred(nama):
-    name_length = 50
+def preprocess_name(nama):
     nama = nama.lower()
     nama = nama.split(" ")
+    return nama
+
+################### FOR LSTM MODEL
+def preprocess_pred(nama):
+    name_length = 50
     nama = [(name + ' '*name_length)[:name_length] for name in nama]
     # Step 2: Encode Characters to Numbers
     nama = [[
@@ -21,12 +28,33 @@ def preprocess_pred(nama):
             for char in name] for name in nama]
     return nama
 
-def predict(model, nama):
-
+def predict_lstm(model, nama):
     pre_name = preprocess_pred(nama)
     # Predictions
     result = model.predict(np.asarray(
     pre_name)).squeeze(axis=1)
+    return result
+
+
+################### FOR 1nn Levenshtein MODEL
+def get_closes(name):
+    distances = DATA_NAME.name.apply(levenshtein_distance, args=(name,))
+    dist = np.argmin(distances)
+    return DATA_NAME.loc[dist,:].values
+
+def predict_1nn_lev(nama):
+    nama = [get_closes(x) for x in nama]
+    probs = [x[1] for x in nama]
+    return probs
+
+def predict(model, nama):
+    nama = preprocess_name(nama)
+
+    # To predict using lstm
+    # result = predict_lstm(model, nama)
+    # To predict using 1nn Levensthein
+    result = predict_1nn_lev(nama)
+
     panjang_nama = len(result)
     if panjang_nama%2==0 or panjang_nama==1:
         prob = sum(result)/len(result)
