@@ -9,9 +9,9 @@ from Levenshtein import distance as levenshtein_distance
 DATA_NAME = pd.read_csv("projects/gender_detection/data_name.csv")
 
 
-def load_models():
-    model = load_model('model_gender.h5')
-    return model
+# def load_models():
+#     model = load_model('model_gender.h5')
+#     return model
 
 def preprocess_name(nama):
     nama = nama.lower()
@@ -47,7 +47,7 @@ def predict_1nn_lev(nama):
     probs = [x[1] for x in nama]
     return probs
 
-def predict(model, nama):
+def predict(nama):
     nama = preprocess_name(nama)
 
     # To predict using lstm

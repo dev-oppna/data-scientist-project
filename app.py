@@ -1,12 +1,12 @@
 import streamlit as st
 import streamlit_authenticator as stauth
-from projects.gender_detection.utils import load_models, predict, make_gauge as mg, make_barplot
+from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 import streamlit.components.v1 as components
 from statistics import mean
 
 
-load_models = st.cache(load_models, allow_output_mutation=True)
+# load_models = st.cache(load_models, allow_output_mutation=True)
 
 st.title('Data Scientist Project')
 
@@ -34,7 +34,7 @@ elif projects == "Name Correction":
         components.html(html, height = 1200,width=1000)
 
 elif projects == "Gender Prediction":
-    model = load_models()
+    # model = load_models()
 
     st.subheader("Gender Detection")
     st.write('''Ini adalah model pendeteksian gender dari nama. Model ini ditraining dari 1 juta data nama gabungan dari dataset 
@@ -42,7 +42,7 @@ elif projects == "Gender Prediction":
     name = st.text_input("Name", key="gender_detection")
 
     if name:
-        result, result_max, gender = predict(model, name)
+        result, result_max, gender = predict(name)
         st.write(f"Gender dari {name} adalah: {gender}")
         conf = mean(result_max)
         if conf < 0.5:
