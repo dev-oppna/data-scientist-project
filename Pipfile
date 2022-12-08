@@ -12,6 +12,7 @@ pyvis = "*"
 h5py = "*"
 plotly = "*"
 python-levenshtein = "*"
+scikit-learn = "*"
 
 [dev-packages]
 
