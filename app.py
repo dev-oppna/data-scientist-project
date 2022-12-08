@@ -5,6 +5,8 @@ from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
 import streamlit.components.v1 as components
 from statistics import mean
+import warnings
+warnings.filterwarnings("ignore")
 
 
 # load_models = st.cache(load_models, allow_output_mutation=True)
