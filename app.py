@@ -2,6 +2,7 @@ import streamlit as st
 import streamlit_authenticator as stauth
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
 from projects.name_correction.utils import get_name, make_gauge, make_graph
+from projects.merchant_categorization.utils import merchant_predict, merchant_clean
 import streamlit.components.v1 as components
 from statistics import mean
 
@@ -12,7 +13,7 @@ st.title('Data Scientist Project')
 
 projects = "Home"
 
-projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction"])
+projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction","Merchant Categorization Prediction"])
 
 if projects == "Home":
     st.write('''Ini adalah platform projek untuk data scientist. Sebelum masuk production, ini adalah platform agar POC projek 
@@ -51,3 +52,16 @@ elif projects == "Gender Prediction":
         st.plotly_chart(fig, use_container_width=True)
         fig_bar = make_barplot(result, name.split())
         st.plotly_chart(fig_bar, use_container_width=True)
+
+elif projects == "Merchant Categorization Prediction":
+    # model = load_models()
+    st.subheader("Merchant Categorization Prediction")
+    st.write('''Ini adalah model pendeteksian merchant categorization. Kamu dapat mendeteksi kategori dari nama merchant''')
+    merchant_name = st.text_input("Merchant Name", key="merchant_detection")
+
+    if merchant_name:
+        merchant_name = merchant_clean(merchant_name)
+        predict_merchant = merchant_predict(merchant_name)
+        st.write(f'Category dari Merchant dengan nama {merchant_name} adalah: {predict_merchant}')
+
+
