@@ -63,7 +63,8 @@ elif projects == "Merchant Categorization Prediction":
 
     if merchant_name:
         merchant_name = merchant_clean(merchant_name)
-        predict_merchant = merchant_predict(merchant_name)
-        st.write(f'Category dari Merchant dengan nama {merchant_name} adalah: {predict_merchant}')
+        predict_merchant_cat,merchant_cat_image = merchant_predict(merchant_name)
+        st.write(f'Category dari Merchant dengan nama {merchant_name} adalah: {predict_merchant_cat}')
+        st.image(merchant_cat_image)
 
 
