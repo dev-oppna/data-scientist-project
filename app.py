@@ -58,7 +58,7 @@ elif projects == "Gender Prediction":
 elif projects == "Merchant Categorization Prediction":
     # model = load_models()
     st.subheader("Merchant Categorization Prediction")
-    st.write('''Ini adalah model pendeteksian merchant categorization. Kamu dapat mendeteksi kategori dari nama merchant''')
+    st.write('''Ini adalah model pendeteksian merchant categorization. Kamu dapat mendeteksi kategori dari nama merchant yang kamu cari''')
     merchant_name = st.text_input("Merchant Name", key="merchant_detection")
 
     if merchant_name:

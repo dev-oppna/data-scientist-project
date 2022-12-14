@@ -2,7 +2,7 @@ import pickle
 import numpy as np
 import string
 
-filename = 'projects/merchant_categorization/merchant_model_final.pkl'
+filename = 'projects/merchant_categorization/merchant_model_final.pkl' 
 loaded_model = pickle.load(open(filename, 'rb'))
 
 filenameidf = 'projects/merchant_categorization/idf_result.pkl'
@@ -17,20 +17,21 @@ loaded_map = pickle.load(open(dict_map_label, 'rb'))
 dict_images_category = {
     'Automotive': '', 
     'Bills & Utilities': '',
-    'Computer & Electronic': '',
+    'Computer & Electronic': 'projects/merchant_categorization/images/computer_and_electronic.jpg',
     'Education': '',
     'Entertainment': 'projects/merchant_categorization/images/entertainment.png',
-    'Fashion & Accessories': '',
-    'Food & Beverage': '',
+    'Fashion & Accessories': 'projects/merchant_categorization/images/fashion_and_accessories.jpg',
+    'Food & Beverage': 'projects/merchant_categorization/images/food_beverage.jpg',
     'Gifts & Donation': '',
     'Health & Wellness': 'projects/merchant_categorization/images/health_and_wellness.png',
     'Hobbies': '',
-    'House Needs': '',
+    'House Needs': 'projects/merchant_categorization/images/house_needs.jpg',
     'Investment': '',
     'Loan': '',
     'Mom & Baby': '',
     'Transportation': '',
-    'Travel':''
+    'Travel':'projects/merchant_categorization/images/travel.jpg',
+    'Others':''
 }
 
 def tfidf_array(merchant): #mengubah nama merchant menjadi representasi angka
@@ -46,6 +47,8 @@ def tfidf_array(merchant): #mengubah nama merchant menjadi representasi angka
 
 def merchant_predict(merchant_name):
     x_pred = tfidf_array(merchant_name)
+    if sum(x_pred) == 0:
+        return 'Not Found','projects/merchant_categorization/images/not_found.jpg'
     label_predict = loaded_model.predict([x_pred])[0] #predict label
     loaded_category = loaded_map[label_predict]
     image_url = dict_images_category[loaded_category]
