@@ -15,21 +15,21 @@ dict_map_label = 'projects/merchant_categorization/mapping_dictionary_label.pkl'
 loaded_map = pickle.load(open(dict_map_label, 'rb'))
 
 dict_images_category = {
-    'Automotive': '', 
-    'Bills & Utilities': '',
+    'Automotive': 'projects/merchant_categorization/images/auto.jpg', 
+    'Bills & Utilities': 'projects/merchant_categorization/images/bills.jpg',
     'Computer & Electronic': 'projects/merchant_categorization/images/computer_and_electronic.jpg',
-    'Education': '',
+    'Education': 'projects/merchant_categorization/images/education.jpg',
     'Entertainment': 'projects/merchant_categorization/images/entertainment.png',
     'Fashion & Accessories': 'projects/merchant_categorization/images/fashion_and_accessories.jpg',
     'Food & Beverage': 'projects/merchant_categorization/images/food_beverage.jpg',
-    'Gifts & Donation': '',
+    'Gifts & Donation': 'projects/merchant_categorization/images/Gifts & Donation.jpg',
     'Health & Wellness': 'projects/merchant_categorization/images/health_and_wellness.png',
-    'Hobbies': '',
+    'Hobbies': 'projects/merchant_categorization/images/hobbies.png',
     'House Needs': 'projects/merchant_categorization/images/house_needs.jpg',
-    'Investment': '',
-    'Loan': '',
-    'Mom & Baby': '',
-    'Transportation': '',
+    'Investment': 'projects/merchant_categorization/images/investment.png',
+    'Loan': 'projects/merchant_categorization/images/loan.png',
+    'Mom & Baby': 'projects/merchant_categorization/images/mom&baby.jpg',
+    'Transportation': 'projects/merchant_categorization/images/transport.jpg',
     'Travel':'projects/merchant_categorization/images/travel.jpg',
     'Others':''
 }
