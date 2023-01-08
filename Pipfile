@@ -16,6 +16,7 @@ scikit-learn = "*"
 osmnx = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
+protobuf = "3.19.6"
 
 [dev-packages]
 
