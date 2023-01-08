@@ -19,6 +19,9 @@ import pandas as pd
 from datetime import datetime as dt
 import random
 import time
+import os
+
+DB_URL = os.getenv("DB_URL")
 
 warnings.filterwarnings("ignore")
 
@@ -26,7 +29,7 @@ st.set_page_config(layout="wide")
 st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', unsafe_allow_html=True)
 @st.cache(suppress_st_warning=True)
 def get_all_df():
-    engine = create_engine('postgresql://hdagqefg:YAHsqQcyDm0_V9kuaXpTvRQOYXZpJmZ9@rosie.db.elephantsql.com/hdagqefg')
+    engine = create_engine(f'postgresql://{DB_URL}')
     all_df = pd.read_sql_query('select * from data',con=engine) # This makes the function take 2s to run
     all_df.top_spend_ecommerce_category = all_df.top_spend_ecommerce_category.fillna("No Category")
     return all_df
