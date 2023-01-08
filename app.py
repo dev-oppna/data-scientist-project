@@ -1,5 +1,4 @@
 import streamlit as st
-import streamlit_authenticator as stauth
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
@@ -18,7 +17,6 @@ import warnings
 import pandas as pd
 from datetime import datetime as dt
 import random
-import time
 import os
 
 DB_URL = os.getenv("DB_URL")
