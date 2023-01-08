@@ -14,7 +14,6 @@ plotly = "*"
 python-levenshtein = "*"
 scikit-learn = "*"
 osmnx = "*"
-protobuf = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
 
