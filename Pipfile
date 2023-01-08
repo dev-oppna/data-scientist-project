@@ -4,7 +4,6 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
-streamlit = "1.13"
 tensorflow = "*"
 networkx = "*"
 streamlit-authenticator = "*"
@@ -15,7 +14,7 @@ python-levenshtein = "*"
 scikit-learn = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
-protobuf = "3.19"
+streamlit = "*"
 
 [dev-packages]
 
