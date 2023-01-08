@@ -14,7 +14,9 @@ python-levenshtein = "*"
 scikit-learn = "*"
 sqlalchemy = "*"
 psycopg2-binary = "*"
-streamlit = "*"
+streamlit = "==1.16.0"
+protobuf = "<4,>=3.12"
+osmnx = "*"
 
 [dev-packages]
 
