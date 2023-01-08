@@ -16,7 +16,6 @@ sqlalchemy = "*"
 psycopg2-binary = "*"
 streamlit = "==1.16.0"
 protobuf = "<4,>=3.12"
-osmnx = "*"
 
 [dev-packages]
 
