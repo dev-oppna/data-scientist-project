@@ -13,7 +13,7 @@ python-levenshtein = "*"
 scikit-learn = "1.0.2"
 sqlalchemy = "*"
 psycopg2-binary = "*"
-protobuf = "<3.20,>=3.12"
+protobuf = "==3.19.0"
 
 [dev-packages]
 
