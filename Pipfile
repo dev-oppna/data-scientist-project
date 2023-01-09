@@ -15,6 +15,7 @@ sqlalchemy = "*"
 psycopg2-binary = "*"
 protobuf = "==3.19"
 scikit-learn = "==1.0.2"
+psutil = "*"
 
 [dev-packages]
 
