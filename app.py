@@ -21,7 +21,6 @@ import os
 import psutil as p
 
 
-print('RAM Used (MB) initial load:', p.virtual_memory().active / (1024.0 ** 2))
 
 DB_URL = os.getenv("DB_URL")
 
@@ -179,6 +178,7 @@ elif projects == "Look a like":
             st.warning('You need to provide phone_number column in your data', icon="⚠️")
         else:
             if "phone_number" in df.columns:
+                df['phone_number'] = df['phone_number'].astype('str')
                 df['opa_id'] = df.phone_number.apply(generate_opa_id)
             if st.button('Look a like!') or st.session_state.load_state:
                 st.session_state.load_state = True
@@ -199,7 +199,6 @@ elif projects == "Look a like":
                     st.plotly_chart(fig)
                     if not st.session_state.model_trained:
                         with st.spinner(text="Training your seed segment..."):
-                            print('RAM Used (MB) inital training:', p.virtual_memory().active / (1024.0 ** 2))
                             start = dt.now()
                             df_noncrossed = all_df.loc[~all_df.opa_id.isin(df.opa_id)]
                             df_noncrossed_sampled = df_noncrossed.sample(len_crossed)
@@ -233,9 +232,7 @@ elif projects == "Look a like":
                             precision, recall = get_precision_recall(y_positive, y_probs)
                             precision.reverse()
                             recall.reverse()
-                            print('RAM Used (MB) in end of training:', p.virtual_memory().active / (1024.0 ** 2))
                         with st.spinner(text="Provisioning your pool..."):
-                            print('RAM Used (MB) in initial of provisioning:', p.virtual_memory().active / (1024.0 ** 2))
                             x_data = generate_df_all(all_df).loc[:,attributes].values
                             y_probs = [x for x in predict_PU_prob(x_data, pu_estimator, threshold)]
                             max_ = max(y_probs)
@@ -245,7 +242,6 @@ elif projects == "Look a like":
                             all_opa['score'] = y_probs_adj
                             all_opa.sort_values(by="score", ascending=False, inplace=True)
                             df_lift = create_df_lift(all_df.label, y_probs_adj)
-                            print('RAM Used (MB) in end of provisioning:', p.virtual_memory().active / (1024.0 ** 2))
                         st.balloons()
                         st.success(f'Congratulations model already trained!')
                         st.session_state.model_trained = True
