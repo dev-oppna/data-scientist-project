@@ -43,6 +43,10 @@ def download_df(df, name, size):
         height=0,
     )
 
+def convert_csv(df, size):
+    object_to_download = df.loc[:,["opa_id"]].head(size).to_csv(index=False).encode('utf-8')
+    return object_to_download
+
 all_df = get_all_df()
 if "load_state" not in st.session_state:
      st.session_state.load_state = False
@@ -50,6 +54,8 @@ if "load_state" not in st.session_state:
      st.session_state.set_address = False
      st.session_state.address_url = None
      st.session_state.api_key_here = None
+     st.session_state.size = None
+     st.session_state.filename = None
 
 # load_models = st.cache(load_models, allow_output_mutation=True)
 
@@ -292,7 +298,16 @@ elif projects == "Look a like":
                         size = st.slider('Segment size', 1000, max_size)
                         submit = st.form_submit_button("Create Segment")
                         if submit:
-                            download_df(all_opa, segment_name, size)
+                            # download_df(all_opa, segment_name, size)
+                            st.session_state.size = size
+                            st.session_state.filename = segment_name
+                    if submit:
+                        st.download_button(
+                            label="Download data as CSV",
+                            data= convert_csv(all_opa, st.session_state.size),
+                            file_name=f'{st.session_state.filename}.csv',
+                            mime='text/csv',
+                        )
                 else:
                     st.warning('Your data is not sufficient for build look a like model! Input another seed!', icon="⚠️")
     else:
