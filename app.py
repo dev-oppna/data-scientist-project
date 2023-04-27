@@ -19,6 +19,7 @@ from datetime import datetime as dt
 import random
 import os
 import psutil as p
+import difflib
 
 
 
@@ -148,6 +149,11 @@ elif projects == "Address Verification":
                 data['city'] = city        
                 label, lat, lon, num_of_alfa, categories, max_lanes, max_width, is_motorcycle, surface, confidence_score, min_distance_to_poi, max_distance_to_poi =  get_status_address(st.session_state.api_key_here, address, poi, radius, data)
                 confidence_score = round(confidence_score)
+                label_extracted = extract_address(st.session_state.address_url, label.lower())
+                data["road_address"] = data["road_address"] if difflib.SequenceMatcher(None, data["road_address"].lower(), label_extracted["road_address"].lower()).quick_ratio() < 0.7 or label_extracted["road_address"] == "" else label_extracted["road_address"]
+                data["rt_address"] = data["rt_address"] if data["rt_address"] != "" else label_extracted["rt_address"]
+                data["rw_address"] = data["rw_address"] if data["rw_address"] != "" else label_extracted["rw_address"]
+                data["block_address"] = data["block_address"] if data["block_address"] != "" else label_extracted["block_address"]
                 data['lat'] = lat
                 data['lon'] = lon
                 data['score'] = score
