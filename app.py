@@ -2,7 +2,7 @@ import streamlit as st
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
-from projects.address_verification.utils import get_status_address, extract_address, get_score
+from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
 from projects.look_a_like.utils import generate_df, fit_PU_estimator, predict_PU_prob, plot_bar, create_df_lift, lift_reach_plot, \
     get_precision_recall, prec_recall_plot, generate_df_all, download_button, get_figure, generate_opa_id
 from sklearn.metrics import accuracy_score, recall_score, precision_score
@@ -146,7 +146,8 @@ elif projects == "Address Verification":
                 data = extract_address(st.session_state.address_url, street)
                 score = get_score(data)
                 data['district'] = district
-                data['city'] = city        
+                data['city'] = city
+                address = construct_address(data, district, city)
                 label, lat, lon, num_of_alfa, categories, max_lanes, max_width, is_motorcycle, surface, confidence_score, min_distance_to_poi, max_distance_to_poi =  get_status_address(st.session_state.api_key_here, address, poi, radius, data)
                 confidence_score = round(confidence_score)
                 label_extracted = extract_address(st.session_state.address_url, label.lower())
