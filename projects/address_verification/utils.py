@@ -42,7 +42,7 @@ def calculate_similarity(x,y):
 def construct_address(data, district, city):
     blok = f"blok {data['block_address']}" if data["block_address"] != "" else ""
     nomor = f"no {data['number_address']}" if data["number_address"] != "" else ""
-    address = f"jalan {data['road_addresss']} {blok} {nomor} {district} {city}"
+    address = f"jalan {data['road_address']} {blok} {nomor} {district} {city}"
     return address.strip()
 
 def get_status_address(api_key, address, poi, radius, extract_address):
