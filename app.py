@@ -1,5 +1,6 @@
 import streamlit as st
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
+from projects.sort_address.utils import sort_waybill
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
 from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
@@ -50,13 +51,14 @@ def convert_csv(df, size):
 
 all_df = get_all_df()
 if "load_state" not in st.session_state:
-     st.session_state.load_state = False
-     st.session_state.model_trained = False
-     st.session_state.set_address = False
-     st.session_state.address_url = None
-     st.session_state.api_key_here = None
-     st.session_state.size = None
-     st.session_state.filename = None
+    st.session_state.load_state = False
+    st.session_state.model_trained = False
+    st.session_state.set_address = False
+    st.session_state.set_waybill = False
+    st.session_state.address_url = None
+    st.session_state.api_key_here = None
+    st.session_state.size = None
+    st.session_state.filename = None
 
 # load_models = st.cache(load_models, allow_output_mutation=True)
 
@@ -65,7 +67,7 @@ st.title('Data Scientist Project')
 
 projects = "Home"
 
-projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction","Merchant Categorization Prediction", "Address Verification", "Look a like"])
+projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction","Merchant Categorization Prediction", "Address Verification", "Sort waybill", "Look a like"])
 
 if projects == "Home":
     st.session_state.load_state = False
@@ -77,6 +79,7 @@ if projects == "Home":
             api_key_here = st.text_input("API Key")
             if st.form_submit_button("Store this urls"):
                 st.session_state.set_address = True
+                st.session_state.set_waybill = True
                 st.session_state.address_url = address_url
                 st.session_state.api_key_here = api_key_here
                 st.experimental_rerun()
@@ -131,7 +134,7 @@ elif projects == "Address Verification":
     if st.session_state.set_address:
         st.write("Your address extraction url:",st.session_state.address_url)
         st.write("Your address API Key:",st.session_state.api_key_here)
-        with st.form("look_a_like_form", clear_on_submit=False):
+        with st.form("address_verification_form", clear_on_submit=False):
             address = st.text_input("Address", key="address_verification")
             col1, col2 = st.columns(2)
             poi = col1.text_input("What POI you want to search?", key="poi")
@@ -179,6 +182,39 @@ elif projects == "Address Verification":
                     st.map(df)
     else:
         st.warning('You need to set address url', icon="⚠️")
+
+elif projects == "Sort waybill":
+    st.session_state.load_state = False
+    st.header("Sort waybill")
+    st.write('''Ini adalah model untuk mensorting alamat berdasarkan alamat terdekat dengan TH.''')
+    num_of_waybill = st.number_input("Number of waybill", key="num_of_waybull", min_value=1, max_value=10, format='%d')
+    my_dict = {}
+    if st.session_state.set_waybill and num_of_waybill:
+        st.write("Your address API Key:",st.session_state.api_key_here)
+        with st.form("sort_waybill_form", clear_on_submit=False):
+            th = st.text_input("Alamat TH", key="address_th")
+            col1, col2 = st.columns(2)
+            latitude = col1.number_input("latitude", key="lat_th", format='%.9f')
+            longitude = col2.number_input("longitude", key="lon_th", format='%.9f')
+
+            for i in range(num_of_waybill):
+                my_dict[i] = {}
+                my_dict[i]["name"] = st.text_input(f"Waybill {i+1}", key=f"sort_waybill_{i}")
+                col11, col21 = st.columns(2)
+                my_dict[i]["latitude"] = col11.number_input(f"latitude {i+1}", key=f"lat_{i}", format='%.9f')
+                my_dict[i]["longitude"]= col21.number_input(f"longitude {i+1}", key=f"lon_{i}", format='%.9f')
+            submit_address = st.form_submit_button("Sort this address")
+            if submit_address:
+                th_data = [{"name": th, "latitude": latitude, "longitude": longitude}]
+                data = th_data + [x for w, x in my_dict.items()]
+                nodes = pd.DataFrame(data)
+                routes, distance, fig = sort_waybill(nodes)
+                st.dataframe(routes)
+                st.write(f"Total distance: {distance}")
+                st.pyplot(fig)
+
+    else:
+        st.warning('You need to set api key', icon="⚠️")
 
 elif projects == "Look a like":
     st.header("Look a like")
