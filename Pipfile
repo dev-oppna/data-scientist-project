@@ -17,6 +17,7 @@ protobuf = "==3.19"
 scikit-learn = "==1.0.2"
 psutil = "*"
 haversine = "*"
+altair = "==4.0"
 
 [dev-packages]
 
