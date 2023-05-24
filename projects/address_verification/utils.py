@@ -52,7 +52,7 @@ def get_status_address(api_key, address, poi, radius, extract_address):
         response = requests.request("GET", url, headers={}, data={})
         geo = json.loads(response.text)
         if len(geo['items']) == 0:
-            return address, "unknown", "unknown", "unknown", "unknown", "unknown", "unknown", "unknown", "unknown"
+            return {"label": address, "postalCode": ""}, "unknown", "unknown", "unknown", "unknown", "unknown", "unknown", "unknown", "unknown"
         item = geo['items'][0]
         district_score = calculate_similarity(extract_address['district'].lower(), item['address']['district'].lower()) * 100
         city_score = calculate_similarity(extract_address['city'].lower(), item['address']['city'].lower()) * 100
@@ -71,21 +71,21 @@ def get_status_address(api_key, address, poi, radius, extract_address):
             categories = ",".join([x['name'].lower() for x in categories])
         else:
             categories = "street"
-        label = item['address']['label']
+        address_ = item['address']
         lat_lon['lat'] = lat_lon['lat']
         lat_lon['lng'] = lat_lon['lng']
         lat_lon = [y for x,y in lat_lon.items()]
         lat, long = lat_lon
-        url = f"https://discover.search.hereapi.com/v1/discover?q={'+'.join(poi.split())}&in=circle:{lat},{long};r={radius}&apiKey={api_key}"
-        response_poi = requests.request("GET", url, headers={}, data={})
-        discover = json.loads(response_poi.text)
-        items_poi = discover['items']
-        num_of_poi = len(items_poi)
-        min_distance_to_poi = 0
-        max_distance_to_poi = 0
-        if num_of_poi > 0:
-            min_distance_to_poi = items_poi[0]['distance']
-            max_distance_to_poi = items_poi[-1]['distance']
+        # url = f"https://discover.search.hereapi.com/v1/discover?q={'+'.join(poi.split())}&in=circle:{lat},{long};r={radius}&apiKey={api_key}"
+        # response_poi = requests.request("GET", url, headers={}, data={})
+        # discover = json.loads(response_poi.text)
+        # items_poi = discover['items']
+        # num_of_poi = len(items_poi)
+        # min_distance_to_poi = 0
+        # max_distance_to_poi = 0
+        # if num_of_poi > 0:
+        #     min_distance_to_poi = items_poi[0]['distance']
+        #     max_distance_to_poi = items_poi[-1]['distance']
         # g = geocoder.osm(lat_lon, method='reverse', maxRows=10)
         # type_address = 'office' if g.current_result.type in ["office", "commercial", "company"] else "not office"
         h = ox.geometries_from_point(lat_lon,tags={'highway': True}, dist=100)
@@ -121,6 +121,9 @@ def get_status_address(api_key, address, poi, radius, extract_address):
             is_motorcycle = "unknown" if pd.isna(is_motorcycle) else is_motorcycle
             surface = first_row.surface if "surface" in way.columns else "unknown"
             surface = "unknown" if pd.isna(surface) else surface
-        return label, lat_lon[0], lat_lon[1], num_of_poi, categories, max_lanes, max_width, is_motorcycle, surface, confidence_score, min_distance_to_poi, max_distance_to_poi
+            num_of_poi = None
+            min_distance_to_poi = None
+            max_distance_to_poi = None
+        return address_, lat_lon[0], lat_lon[1], num_of_poi, categories, max_lanes, max_width, is_motorcycle, surface, confidence_score, min_distance_to_poi, max_distance_to_poi
     except Exception as e:
-        return address, "error", "error", "error", "error", "error", "error", "error", "error", 0, 0, 0
+        return {"label": address, "postalCode": ""}, "error", "error", "error", "error", "error", "error", "error", "error", 0, 0, 0

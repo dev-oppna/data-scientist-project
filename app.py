@@ -151,18 +151,21 @@ elif projects == "Address Verification":
                 data['district'] = district
                 data['city'] = city
                 address = construct_address(data, district, city)
-                label, lat, lon, num_of_alfa, categories, max_lanes, max_width, is_motorcycle, surface, confidence_score, min_distance_to_poi, max_distance_to_poi =  get_status_address(st.session_state.api_key_here, address, poi, radius, data)
+                address, lat, lon, num_of_alfa, categories, max_lanes, max_width, is_motorcycle, surface, confidence_score, min_distance_to_poi, max_distance_to_poi =  get_status_address(st.session_state.api_key_here, address, poi, radius, data)
+                label = address["label"]
                 confidence_score = round(confidence_score)
                 label_extracted = extract_address(st.session_state.address_url, label.lower())
                 data["road_address"] = data["road_address"] if difflib.SequenceMatcher(None, ''.join(filter(str.isalpha, data["road_address"])).lower(), ''.join(filter(str.isalpha, label_extracted["road_address"])).lower()).quick_ratio() < 0.6 or label_extracted["road_address"] == "" else label_extracted["road_address"]
                 data["rt_address"] = data["rt_address"] if data["rt_address"] != "" else label_extracted["rt_address"]
                 data["rw_address"] = data["rw_address"] if data["rw_address"] != "" else label_extracted["rw_address"]
                 data["block_address"] = data["block_address"] if data["block_address"] != "" else label_extracted["block_address"]
+                data['postal_code'] = address["postalCode"]
                 data['lat'] = lat
                 data['lon'] = lon
                 data['score'] = score
                 data['confidence'] = confidence_score
                 df = pd.DataFrame([data])
+                label = (construct_address(data, district, city) + f" {address['postalCode']} {address['county']} {address['countryName']}").lower()
                 st.dataframe(df)
                 st.write(f'''
                 label: {label}\n
