@@ -6,12 +6,14 @@ from scipy.spatial import distance
 import networkx.algorithms.approximation as nx_app
 import pandas as pd
 import matplotlib.pyplot as plt
+from sklearn.cluster import DBSCAN
 
 def sort_waybill(nodes):
     F = nx.Graph()
     nodes.reset_index(inplace=True)
     dict_waybill = nodes.name.to_dict()
     coordinates_ = [(x,y) for x,y in zip(nodes.loc[:, "latitude"], nodes.loc[:, "longitude"])]
+    clusters = DBSCAN(eps=0.2/6371., min_samples=1, algorithm='ball_tree', metric='haversine').fit_predict(np.radians(nodes.loc[1:,["latitude", "longitude"]].values))
     permu = [x for x in itertools.combinations(nodes.name, 2)]
     dfs = pd.DataFrame(distance.cdist(coordinates_, coordinates_, haversine))
     dfs.rename(index=dict_waybill, inplace=True)
@@ -27,10 +29,12 @@ def sort_waybill(nodes):
     F.add_edges_from(possible_edges)
     pos = {data["name"]: (data["longitude"], data["latitude"]) for index, data in nodes.iterrows()} 
     cycle = nx_app.christofides(F, weight="weight")
+    nodes["cluster"] = [0] + list(clusters + 1)
     nodes["rank"] = nodes.name.replace({x:i for i, x in enumerate(cycle[:-1])})
     nodes.sort_values(by="rank", ascending=True, inplace=True)
     edge_list = list(nx.utils.pairwise(cycle))
     total_distance_opt = sum([dfs.loc[x] for x in edge_list])
+    
 
     # Draw route
     fig, ax = plt.subplots(1, 1)
@@ -47,7 +51,7 @@ def sort_waybill(nodes):
     ax.set_title('Ranking', size=16)
     labels = {}
     for index, label in enumerate(list([x[0] for x in edge_list])):
-        labels[label] = f"{index} - {label}"
+        labels[label] = f"{index}"
         
     nx.draw_networkx(
         F,
@@ -124,4 +128,4 @@ def sort_waybill(nodes):
     # ax4.plot(xs,ys)
 
     # plt.show()
-    return nodes.loc[:,["name", "rank"]], total_distance_opt, fig
+    return nodes.loc[:,["name", "rank", "cluster"]], total_distance_opt, fig
