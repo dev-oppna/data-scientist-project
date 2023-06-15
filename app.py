@@ -190,7 +190,7 @@ elif projects == "Sort waybill":
     st.session_state.load_state = False
     st.header("Sort waybill")
     st.write('''Ini adalah model untuk mensorting alamat berdasarkan alamat terdekat dengan TH.''')
-    num_of_waybill = st.number_input("Number of waybill", key="num_of_waybull", min_value=1, max_value=10, format='%d')
+    num_of_waybill = st.number_input("Number of waybill", key="num_of_waybull", min_value=1, max_value=100, format='%d')
     my_dict = {}
     if st.session_state.set_waybill and num_of_waybill:
         st.write("Your address API Key:",st.session_state.api_key_here)
