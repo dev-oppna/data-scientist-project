@@ -231,7 +231,7 @@ elif projects == "Sort waybill":
             )
 
     else:
-        st.warning('You need to set api key', icon="⚠️")
+        st.warning('You need to set api key and url', icon="⚠️")
 
 elif projects == "Look a like":
     st.header("Look a like")
