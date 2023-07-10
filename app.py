@@ -1,6 +1,6 @@
 import streamlit as st
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
-from projects.sort_address.utils import sort_waybill
+from projects.sort_address.utils import sort_waybill, sort_waybill_addrress
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
 from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
@@ -214,7 +214,7 @@ elif projects == "Sort waybill":
                 data = [x for w, x in my_dict.items()]
                 nodes = pd.DataFrame(data)
                 # routes, distance, fig = sort_waybill(nodes)
-                routes = sort_waybill(nodes)
+                routes = sort_waybill_addrress(nodes, st.session_state.address_url)
                 st.dataframe(routes)
                 # st.write(f"Total distance: {distance}")
                 # st.pyplot(fig)
