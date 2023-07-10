@@ -319,9 +319,8 @@ def sort_waybill(nodes):
 
 
 def sort_waybill_addrress(nodes, url):
-    nodes.reset_index(inplace=True)
     nodes.columns = ["waybill_no", "recipient_address"]
-    nodes["extracted_address"] = nodes.recipient_address.apply(extract_address, url)
+    nodes["extracted_address"] = nodes.recipient_address.apply(lambda x: extract_address(x, url))
     data = {x:{**y, **{"full_address":w}} for w,x,y in zip(nodes.recipient_address, nodes.waybill_no, nodes.extracted_address)}
     list_permutations = [x for x in itertools.combinations(data.keys(), 2)]
     dict_similarity = {x: max(ospm(standarized_address(data[x[0]]['road_address']), 
@@ -365,5 +364,6 @@ def sort_waybill_addrress(nodes, url):
     mapping_cluster_final = {x[2:].title() if "jl" in x[:3].lower() else x:y for x,y in mapping_cluster_final.items()}
     mapps = {i:x for x,y in mapping_cluster_final.items() for i in y["waybills"]}
     nodes["cluster"] = [mapps[x] for x in nodes.waybill_no]
-    nodes.sort_values(by=["cluster"], inplace=True)
-    return nodes
+    nodes.sort_values(by=["cluster", "recipient_address"], inplace=True)
+    
+    return nodes.loc[:, [x for x in nodes.columns if x != "extracted_address"]]

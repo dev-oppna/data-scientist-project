@@ -49,6 +49,10 @@ def convert_csv(df, size):
     object_to_download = df.loc[:,["opa_id"]].head(size).to_csv(index=False).encode('utf-8')
     return object_to_download
 
+def convert_csv_general(df):
+    object_to_download = df.to_csv(index=False).encode('utf-8')
+    return object_to_download
+
 all_df = get_all_df()
 if "load_state" not in st.session_state:
     st.session_state.load_state = False
@@ -218,6 +222,13 @@ elif projects == "Sort waybill":
                 st.dataframe(routes)
                 # st.write(f"Total distance: {distance}")
                 # st.pyplot(fig)
+        if submit_address:
+            st.download_button(
+                label="Download data as CSV",
+                data= convert_csv_general(routes),
+                file_name=f'routes.csv',
+                mime='text/csv',
+            )
 
     else:
         st.warning('You need to set api key', icon="⚠️")
