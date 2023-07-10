@@ -202,19 +202,22 @@ elif projects == "Sort waybill":
 
             for i in range(num_of_waybill):
                 my_dict[i] = {}
-                my_dict[i]["name"] = st.text_input(f"Waybill {i+1}", key=f"sort_waybill_{i}")
-                col11, col21 = st.columns(2)
-                my_dict[i]["latitude"] = col11.number_input(f"latitude {i+1}", key=f"lat_{i}", format='%.9f')
-                my_dict[i]["longitude"]= col21.number_input(f"longitude {i+1}", key=f"lon_{i}", format='%.9f')
+                my_dict[i]["waybill"] = st.text_input(f"Waybill {i+1}", key=f"sort_waybill_{i}")
+                my_dict[i]["recipient_address"] = st.text_input(f"Address {i+1}", key=f"sort_address_{i}")
+                # col11, col21 = st.columns(2)
+                # my_dict[i]["latitude"] = col11.number_input(f"latitude {i+1}", key=f"lat_{i}", format='%.9f')
+                # my_dict[i]["longitude"]= col21.number_input(f"longitude {i+1}", key=f"lon_{i}", format='%.9f')
             submit_address = st.form_submit_button("Sort this address")
             if submit_address:
-                th_data = [{"name": th, "latitude": latitude, "longitude": longitude}]
-                data = th_data + [x for w, x in my_dict.items()]
+                th_data = [{"name": th, "recipient_address": latitude, "longitude": longitude}]
+                # data = th_data + [x for w, x in my_dict.items()]
+                data = [x for w, x in my_dict.items()]
                 nodes = pd.DataFrame(data)
-                routes, distance, fig = sort_waybill(nodes)
+                # routes, distance, fig = sort_waybill(nodes)
+                routes = sort_waybill(nodes)
                 st.dataframe(routes)
-                st.write(f"Total distance: {distance}")
-                st.pyplot(fig)
+                # st.write(f"Total distance: {distance}")
+                # st.pyplot(fig)
 
     else:
         st.warning('You need to set api key', icon="⚠️")
