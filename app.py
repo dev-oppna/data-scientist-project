@@ -194,42 +194,46 @@ elif projects == "Sort waybill":
     st.session_state.load_state = False
     st.header("Sort waybill")
     st.write('''Ini adalah model untuk mensorting alamat berdasarkan alamat terdekat dengan TH.''')
-    num_of_waybill = st.number_input("Number of waybill", key="num_of_waybull", min_value=1, max_value=100, format='%d')
-    my_dict = {}
-    if st.session_state.set_waybill and num_of_waybill:
-        st.write("Your address API Key:",st.session_state.api_key_here)
-        with st.form("sort_waybill_form", clear_on_submit=False):
-            th = st.text_input("Alamat TH", key="address_th")
-            col1, col2 = st.columns(2)
-            latitude = col1.number_input("latitude", key="lat_th", format='%.9f')
-            longitude = col2.number_input("longitude", key="lon_th", format='%.9f')
+    waybill_file_excel = st.file_uploader(label="Enter your data", type=['csv'], key="files_waybill")
+    if st.session_state.set_waybill is not None:
+        if waybill_file_excel is not None:
+            df = pd.read_csv(waybill_file_excel)
+            st.dataframe(df.head())
+        # num_of_waybill = st.number_input("Number of waybill", key="num_of_waybull", min_value=1, max_value=100, format='%d')
+        # my_dict = {}
+        # if st.session_state.set_waybill and num_of_waybill:
+            st.write("Your address extraction url:",st.session_state.address_url)
+            with st.form("sort_waybill_form", clear_on_submit=False):
+        #         th = st.text_input("Alamat TH", key="address_th")
+        #         col1, col2 = st.columns(2)
+        #         latitude = col1.number_input("latitude", key="lat_th", format='%.9f')
+        #         longitude = col2.number_input("longitude", key="lon_th", format='%.9f')
 
-            for i in range(num_of_waybill):
-                my_dict[i] = {}
-                my_dict[i]["waybill"] = st.text_input(f"Waybill {i+1}", key=f"sort_waybill_{i}")
-                my_dict[i]["recipient_address"] = st.text_input(f"Address {i+1}", key=f"sort_address_{i}")
-                # col11, col21 = st.columns(2)
-                # my_dict[i]["latitude"] = col11.number_input(f"latitude {i+1}", key=f"lat_{i}", format='%.9f')
-                # my_dict[i]["longitude"]= col21.number_input(f"longitude {i+1}", key=f"lon_{i}", format='%.9f')
-            submit_address = st.form_submit_button("Sort this address")
+        #         for i in range(num_of_waybill):
+        #             my_dict[i] = {}
+        #             my_dict[i]["waybill"] = st.text_input(f"Waybill {i+1}", key=f"sort_waybill_{i}")
+        #             my_dict[i]["recipient_address"] = st.text_input(f"Address {i+1}", key=f"sort_address_{i}")
+        #             # col11, col21 = st.columns(2)
+        #             # my_dict[i]["latitude"] = col11.number_input(f"latitude {i+1}", key=f"lat_{i}", format='%.9f')
+        #             # my_dict[i]["longitude"]= col21.number_input(f"longitude {i+1}", key=f"lon_{i}", format='%.9f')
+                col1, col2 = st.columns(2)
+                waybill_col = col1.text_input("Kolom waybill", key="waybill_col")
+                address_col = col2.text_input("Kolom address", key="address_col")
+                submit_address = st.form_submit_button("Sort this address")
+                if submit_address:
+                    nodes = df.loc[:,[waybill_col, address_col ]].copy()
+                    # routes, distance, fig = sort_waybill(nodes)
+                    routes = sort_waybill_addrress(nodes, st.session_state.address_url)
+                    st.dataframe(routes)
+                    # st.write(f"Total distance: {distance}")
+                    # st.pyplot(fig)
             if submit_address:
-                th_data = [{"name": th, "recipient_address": latitude, "longitude": longitude}]
-                # data = th_data + [x for w, x in my_dict.items()]
-                data = [x for w, x in my_dict.items()]
-                nodes = pd.DataFrame(data)
-                # routes, distance, fig = sort_waybill(nodes)
-                routes = sort_waybill_addrress(nodes, st.session_state.address_url)
-                st.dataframe(routes)
-                # st.write(f"Total distance: {distance}")
-                # st.pyplot(fig)
-        if submit_address:
-            st.download_button(
-                label="Download data as CSV",
-                data= convert_csv_general(routes),
-                file_name=f'routes.csv',
-                mime='text/csv',
-            )
-
+                st.download_button(
+                    label="Download data as CSV",
+                    data= convert_csv_general(routes),
+                    file_name=f'routes.csv',
+                    mime='text/csv',
+                )
     else:
         st.warning('You need to set api key and url', icon="⚠️")
 
