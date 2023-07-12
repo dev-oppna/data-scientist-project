@@ -223,7 +223,8 @@ elif projects == "Sort waybill":
                 if submit_address:
                     nodes = df.loc[:,[waybill_col, address_col ]].copy()
                     # routes, distance, fig = sort_waybill(nodes)
-                    routes = sort_waybill_addrress(nodes, st.session_state.address_url)
+                    with st.spinner(text="Creating your cluster..."):
+                        routes = sort_waybill_addrress(nodes, st.session_state.address_url)
                     st.dataframe(routes)
                     # st.write(f"Total distance: {distance}")
                     # st.pyplot(fig)
