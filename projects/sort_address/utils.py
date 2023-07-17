@@ -419,12 +419,14 @@ def sort_waybill_addrress(nodes, url):
         data = {x:{**y, **{"full_address":x, "waybills":z}} for x,y,z in zip(df_group.recipient_address, df_group.extracted_address, df_group.waybills)}
         list_permutations = [x for x in itertools.combinations(data.keys(), 2)]
         if len(list_permutations) > 0:
-            dict_similarity = {x: max(mean([ospm(standarized_address(data[x[0]]['road_address']), 
-                                        standarized_address(data[x[1]]['road_address'])), 
-                                        ospm("".join((data[x[0]]['number_address']).lower()),
-                                        "".join((data[x[1]]['number_address']).lower()))]),
-                            ospm(standarized_address(clean_address(data[x[0]]['building_name_address'])), 
-                                standarized_address(clean_address(data[x[1]]['building_name_address'])))) for x in list_permutations}
+            dict_similarity = {x: max(
+                                        0,
+                                        # mean([ospm(standarized_address(data[x[0]]['road_address']), 
+                                        # standarized_address(data[x[1]]['road_address'])), 
+                                        # ospm("".join((data[x[0]]['number_address']).lower()),
+                                        # "".join((data[x[1]]['number_address']).lower()))]),
+                                        ospm(standarized_address(clean_address(data[x[0]]['building_name_address'])), 
+                                            standarized_address(clean_address(data[x[1]]['building_name_address'])))) for x in list_permutations}
             G = nx.Graph()
             G.add_nodes_from([(x, {**{"label": x}, **y}) for x,y in zip(df_group.recipient_address, df_group.extracted_address)])
             G.add_edges_from([x for x in list(dict_similarity.keys()) if dict_similarity[x]>0.8 or len(set(standarized_building(data[x[0]]['building_name_address']).split()) &
