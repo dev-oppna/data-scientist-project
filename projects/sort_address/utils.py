@@ -373,15 +373,11 @@ def sort_waybill_addrress(nodes, url):
                           ospm(standarized_address(data[x[0]]['building_name_address']), 
                                standarized_address(data[x[1]]['building_name_address']))) for x in list_permutations}
     G = nx.Graph()
-    G.add_nodes_from([(x, {**{"label": x}, **y}) for x,y in zip(nodes.waybill_no, nodes.extracted_address)])
+    G.add_nodes_from([(x, {**{"label": x}, **y}) for x,y in zip(df_group.recipient_address, df_group.extracted_address)])
     G.add_edges_from([x for x in list(dict_similarity.keys()) if dict_similarity[x]>0.75])
     list_group = list(nx.algorithms.components.connected_components(G))
     list_group = [list(x) for x in list_group]
-    group_name = [[((standarized_address(data[y]['building_name_address']), 0), (standarized_address(data[y]['road_address']), 1), (data[y]['full_address'], 2)) for y in x] for x in list_group]
-    mapping_group_name_type = [k for w in group_name for i in w for k in i]
-    mapping_group_name_type = dict(sorted(mapping_group_name_type, key=lambda pair: (pair[0], -pair[1])))
-    group_name = [sorted(collections.Counter([i[0] for y in x for i in y if i[0] != ""]).most_common(), 
-                        key=lambda pair: (pair[1], -len(pair[0])), reverse=True) for x in group_name]
+
     group_name = [[((standarized_address(data[y]['building_name_address']), 0), (standarized_address(data[y]['road_address']), 1), (data[y]['full_address'], 2)) for y in x] for x in list_group]
     mapping_group_name_type = [k for w in group_name for i in w for k in i]
     mapping_group_name_type = dict(sorted(mapping_group_name_type, key=lambda pair: (pair[0], -pair[1])))
@@ -389,6 +385,8 @@ def sort_waybill_addrress(nodes, url):
                         key=lambda pair: (pair[1], -len(pair[0])), reverse=True) for x in group_name]
     group_name = [standarized_cluster_name(x[0][0], mapping_group_name_type[x[0][0]]) for x in group_name]
     mapping_cluster = {x:{} for x in group_name}
+    list_group = [[w for y in x for w in data[y]["waybills"]] for x in list_group]
+    
     for x,y in zip(group_name, list_group):
         mapping_cluster[x]["waybills"] = []
     for x,y in zip(group_name, list_group):
