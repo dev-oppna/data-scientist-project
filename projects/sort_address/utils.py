@@ -412,7 +412,7 @@ def sort_waybill_addrress(nodes, url):
 
     nodes["sub_cluster"] = nodes.waybill_no
     for cluster, data in mapping_cluster_final.items():
-        df2 = nodes.loc[nodes.waybill_no.isin(data["waybills"])].drop_duplicates(subset=["recipient_address"])
+        df2 = nodes.loc[nodes.waybill_no.isin(data["waybills"])]
         df_group = df2.groupby(["recipient_address"]).agg({"waybill_no": [list], "extracted_address": [pd.Series.mode]})
         df_group.reset_index(inplace=True)
         df_group.columns = ["recipient_address", "waybills", "extracted_address"]
@@ -435,7 +435,7 @@ def sort_waybill_addrress(nodes, url):
             building_name = [{word: count for word, count in collections.Counter(x[0].split()).items() if count >= ((x[1]//2) + 1) and word.isalpha()} for x in building_name]
             group_name = [" ".join(x.keys()) for x in building_name]
             mapping_cluster_building = {x:{} for x in group_name}
-            list_group = [[z for z in data[y]["waybills"]] for x in list_group for y in x]
+            list_group = [[z for y in x for z in data[y]["waybills"]] for x in list_group]
             
             for x,y in zip(group_name, list_group):
                 mapping_cluster_building[x]["waybills"] = []
