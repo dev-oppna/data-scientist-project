@@ -1,6 +1,6 @@
 import streamlit as st
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
-from projects.sort_address.utils import sort_waybill, sort_waybill_addrress
+from projects.sort_address.utils import sort_waybill, sort_waybill_addrress, cluster_waybill
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
 from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
@@ -216,15 +216,18 @@ elif projects == "Sort waybill":
         #             # col11, col21 = st.columns(2)
         #             # my_dict[i]["latitude"] = col11.number_input(f"latitude {i+1}", key=f"lat_{i}", format='%.9f')
         #             # my_dict[i]["longitude"]= col21.number_input(f"longitude {i+1}", key=f"lon_{i}", format='%.9f')
-                col1, col2 = st.columns(2)
+                col1, col2, col3, col4 = st.columns(4)
                 waybill_col = col1.text_input("Kolom waybill", key="waybill_col")
                 address_col = col2.text_input("Kolom address", key="address_col")
+                district_col = col3.text_input("Kolom district", key="district_col")
+                city_col = col4.text_input("Kolom city", key="city_col")
                 submit_address = st.form_submit_button("Sort this address")
                 if submit_address:
-                    nodes = df.loc[:,[waybill_col, address_col ]].copy()
+                    nodes = df.loc[:,[waybill_col, address_col, district_col, city_col ]].copy()
                     # routes, distance, fig = sort_waybill(nodes)
                     with st.spinner(text="Creating your cluster..."):
-                        routes = sort_waybill_addrress(nodes, st.session_state.address_url)
+                        # routes = sort_waybill_addrress(nodes, st.session_state.address_url)
+                        routes = cluster_waybill(nodes, st.session_state.address_url)
                     st.dataframe(routes)
                     # st.write(f"Total distance: {distance}")
                     # st.pyplot(fig)

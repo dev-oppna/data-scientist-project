@@ -19,6 +19,7 @@ psutil = "*"
 haversine = "*"
 altair = "==4.0"
 matplotlib = "*"
+jaro-winkler = "==2.0.3"
 
 [dev-packages]
 

@@ -12,6 +12,7 @@ import requests
 import re
 import collections
 import json
+import jaro
 from statistics import mean
 
 def extract_address(address, url):
@@ -27,18 +28,25 @@ def extract_address(address, url):
     data = response['predictions'][0]
     return data
 
-def extract_address_bulk(addresses, url):
+def extract_address_bulk(df, url):
+    df1 = df.copy()
+    df1 = df1.loc[:,["recipient_address", "district", "city"]]
+    df1.drop_duplicates(inplace=True)
     payload = json.dumps({
         "instances": 
             [{
-            "address": address
-            } for address in addresses]
+                "address": row[1]["recipient_address"],
+                "district": row[1]["district"],
+                "city": row[1]["city"],
+                "list_address": []
+            } for row in df1.iterrows()]
         })
     headers = { 'Content-Type': 'application/json' }
-    response = requests.request("POST", url+"/predictions/ner_model", headers=headers, data=payload)
+    response = requests.request("POST", url+"/predictions/giants", headers=headers, data=payload)
     response = response.json()
+    addresses = [f"{row[1]['recipient_address']} {row[1]['district']} {row[1]['city']}" for row in df1.iterrows()]
     data = response['predictions']
-    data = {y:dat for dat, y in zip(data,addresses)}
+    data = {y:dat["extracted_address"] for dat, y in zip(data,addresses)}
     return data
 
 DICT_FIX = {
@@ -75,12 +83,17 @@ DICT_FIX = {
     "apartment": "apartement",
     "apt": "apartement",
     "apartemen": "apartement",
+    "apartmen": "apartement",
     "ressidence": "residence",
     "komp": "komplek",
     "ds": "desa",
     "dk": "desa",
     "kp": "kampung",
-    "ponpes": "pondok pesantren"
+    "ponpes": "pondok pesantren",
+    "jend": "jendral",
+    "kom": "komplek",
+    "ps": "pasar",
+    "psr": "pasar"
 }
 
 def clean_address(address):
@@ -89,17 +102,25 @@ def clean_address(address):
         address = address.replace("alamat", "")
         address = address.replace(".", " ")
         address = address.replace(",", " ")
-        address = address.replace("-", " ")
         address = address.replace("/", " ")
+        address = address.replace("-", " ")
+        address = address.replace("\n", " ")
         address = re.sub('\(\s*(.*?)\s*\)', r'(\1)', address)
         address = re.sub(r"(\S)\(", r'\1 (', address)
         address = re.sub(r"\)(\S)", r') \1', address)
-        address = re.sub('[^a-zA-Z0-9 \n\.]', '', address)
+        address = re.sub('[^a-zA-Z0-9 \n\.]', ' ', address)
         address = re.sub(' +', ' ', address)
+        address = re.sub(r' rt([0-9]+)', r" rt \1", address)
+        address = re.sub(r' rw([0-9]+)', r" rw \1", address)
+        address = re.split(r'(\d+)', address)
+        address = [x.strip() for x in address]
+        address = " ".join(address)
         address = address.strip()
         address = address.split(" ")
         address = [DICT_FIX.get(x,x) for x in address]
-        return " ".join(address)
+        address = " ".join(address)
+        address = re.sub(' +', ' ', address)
+        return address
     else:
         return address
     
@@ -177,7 +198,7 @@ def standarized_address(address):
     mapping = ['masjid', "banjar", "dusun", "ruko", "taman", "blok", "block", "no", "nomor", 
                 "jalan", "perumahan", "al", "city", "residence", "raya", "the", "kavling",
                "kampung", "lapangan", "apartement", "tower", "graha", " kos ", "plaza", "komplek", 
-               "gang", "gedung", "lantai", "desa", "pondok", "pesantren"]
+               "gang", "gedung", "lantai", "desa", "pondok", "pesantren", "kantor"]
     address = address.lower()
     address = " ".join([x for x in address.split() if x not in mapping])
 #     for key in mapping:
@@ -186,32 +207,39 @@ def standarized_address(address):
         road_address = " ".join([ roman_to_int(x) if validate_roman(x) else x for x in address.split()])
         address = road_address
     address = "".join([x for x in address if not x.isnumeric()])
-    address = " ".join([x for x in address.split()])
+    address = " ".join([x for x in address.split() if len(x) > 1])
     address = address.translate(str.maketrans('', '', string.punctuation))
     return address.lower().strip()
 
 def standarized_building(building):
     address = clean_address(building)
-    mapping = ["gedung", "lantai", "indonesia", "pt"]
+    mapping = ["gedung", "lantai", "indonesia", "pt", "unit", "apartement"]
     address = address.lower()
     address = " ".join([x for x in address.split() if x not in mapping])
     if any([validate_roman(x) for x in address.split()]):
         road_address = " ".join([ roman_to_int(x) if validate_roman(x) else x for x in address.split()])
         address = road_address
     address = "".join([x for x in address if not x.isnumeric()])
-    address = " ".join([x for x in address.split()])
+    address = " ".join([x for x in address.split() if len(x) > 1])
     address = address.translate(str.maketrans('', '', string.punctuation))
     return address.lower().strip()
 
 def standarized_cluster_name(address, type_):
     address_ = standarized_address(address)
     if len(address) > 15 and type_ == 2:
-        m = re.search(r"\d", address)
+        if any([validate_roman(x) for x in address.split()]):
+            address = " ".join([ roman_to_int(x) if validate_roman(x) else x for x in address.split()])
+        address__ = " ".join([x for x in clean_address(address).split() if x not in ["rt", "rw", "no", "nomor", "desa", "dusun"]])
+        check_beginning = address__[0].isnumeric()
+        while check_beginning:
+            address__ = " ".join([x for x in address__.split()[1:]])
+            check_beginning = address__[0].isnumeric()
+        m = re.search(r"\d", address__)
         if m: 
-            cluster = address[:m.start()].strip()
+            cluster = address__[:m.start()].strip()
             cluster = cluster.lower()
-            return " ".join([x for x in standarized_address(cluster).split() if x not in ["rt", "rw", "no", "nomor"]]).title().strip()
-        return address_.split()[0].title().strip()
+            return " ".join([x for x in standarized_address(cluster).split() if x not in ["rt", "rw", "no", "nomor", "desa"]]).title().strip()
+        return " ".join(address__.split()[0:max(1, len(address.split())//5)]).title().strip()
     return address_.title()
 
 def ospm(s1: str, s2: str) -> float:
@@ -229,9 +257,51 @@ def ospm(s1: str, s2: str) -> float:
     intersect = collections.Counter(s1) & collections.Counter(s2)
     matches = sum(intersect.values())
     GPM_difflib = 2.0 * matches / length
-    if s1 in s2:
-        return max(GPM_difflib + (1 - GPM_difflib) * (len(s1)/len(s2)), 0.8)
+    if s1 in s2 and len(s1) > 3 and len(s1)/len(s2) > 0.4:
+        return GPM_difflib + (1 - GPM_difflib) * (len(s1)/len(s2))
     return GPM_difflib
+
+def ospm_sub(s1: str, s2: str) -> float:
+    s1 = s1.replace(" ", "")
+    s2 = s2.replace(" ", "")
+    if len(s1) > len(s2):
+        string_temp = s1
+        s1 = s2
+        s2 = string_temp
+    length = len(s1) + len(s2)
+    if not length:
+        return 0
+    if s1 == "" or s2 == "":
+        return 0
+    intersect = collections.Counter(s1) & collections.Counter(s2)
+    matches = sum(intersect.values())
+    GPM_difflib = 2.0 * matches / length
+    if s1 in s2 and len(s1) > 3 and len(s1)/len(s2) > 0.4:
+        return GPM_difflib + (1 - GPM_difflib) * (len(s1)/len(s2))
+    return GPM_difflib
+
+def contain_(s1: str, s2: str) -> float:
+    s1 = s1.replace(" ", "")
+    s2 = s2.replace(" ", "")
+    if len(s1) > len(s2):
+        string_temp = s1
+        s1 = s2
+        s2 = string_temp
+    if s1 in s2 and len(s1) > 3:
+        return 0.95
+    return 0
+
+def ospm_adj(s1: str, s2: str) -> float:
+    s1 = s1.replace(" ", "")
+    s2 = s2.replace(" ", "")
+    if len(s1) > len(s2):
+        string_temp = s1
+        s1 = s2
+        s2 = string_temp
+    if len(s1)/len(s2) < 0.25 and len(s1) <= 3:
+        return 0
+    else:
+        return ospm(s1, s2)
 
 def sort_waybill(nodes):
     F = nx.Graph()
@@ -461,5 +531,128 @@ def sort_waybill_addrress(nodes, url):
             mapps_building = {z:standarized_building(y["building_name_address"]).title() for x,y in data.items() for z in y["waybills"]}
             nodes["sub_cluster"] = nodes.sub_cluster.replace(mapps_building)
     nodes.sort_values(by=["cluster", "sub_cluster", "recipient_address"], inplace=True)
-    
+
+def cluster_waybill(nodes, url):
+    nodes.columns = ["waybill_no", "recipient_address", "district", "city"]
+    map_extracted = extract_address_bulk(nodes, url)
+    nodes["clean_address"] = nodes["recipient_address"] + " " + nodes["district"] + " " + nodes["city"]
+    nodes["extracted_address"] = nodes.clean_address.apply(lambda x: map_extracted[x])
+    df_group = nodes.groupby(["recipient_address"]).agg({"waybill_no": [list], "extracted_address": [pd.Series.mode]})
+    df_group.reset_index(inplace=True)
+    df_group.columns = ["recipient_address", "waybills", "extracted_address"]
+    data = {x:{**y, **{"full_address":x, "waybills":z}} for x,y,z in zip(df_group.recipient_address, df_group.extracted_address, df_group.waybills)}
+    list_permutations = [x for x in itertools.combinations(data.keys(), 2)]
+    # data = {x:{**y, **{"full_address":w}} for w,x,y in zip(nodes.recipient_address, nodes.waybill_no, nodes.extracted_address)}
+    # list_permutations = [x for x in itertools.combinations(data.keys(), 2)]
+    dict_similarity = {x: max(ospm(standarized_address(data[x[0]]['road_address']), 
+                                standarized_address(data[x[1]]['road_address'])),
+                            ospm(standarized_address(data[x[0]]['building_name_address']), 
+                                standarized_address(data[x[1]]['building_name_address']))) for x in list_permutations}
+    G = nx.Graph()
+    G.add_nodes_from([(x, {**{"label": x}, **y}) for x,y in zip(df_group.recipient_address, df_group.extracted_address)])
+    G.add_edges_from([x for x in list(dict_similarity.keys()) if dict_similarity[x] > 0.8])
+
+    list_group = list(nx.algorithms.components.connected_components(G))
+    list_group = [list(x) for x in list_group]
+
+    group_name = [[((standarized_address(data[y]['road_address']), 0), (standarized_address(data[y]['building_name_address']), 1), (data[y]['full_address'], 2))*len(data[y]["waybills"]) for y in x] for x in list_group]
+    mapping_group_name_type = [k for w in group_name for i in w for k in i]
+    mapping_group_name_type = dict(sorted(mapping_group_name_type, key=lambda pair: (pair[0], -pair[1])))
+
+    group_name_test = group_name
+
+    group_name = [collections.Counter([i[0] for y in x for i in y if i[0] != ""]).most_common() for x in group_name_test]
+    group_name = [sorted([(*y, mapping_group_name_type[y[0]]) for y in x],
+                        key=lambda pair: (-pair[2], pair[1], -len(pair[0])), reverse=True) for x in group_name]
+    group_name = [standarized_cluster_name(x[0][0], mapping_group_name_type[x[0][0]]) for x in group_name]
+
+    mapping_cluster = {x:{} for x in group_name}
+    list_group = [[w for y in x for w in data[y]["waybills"]] for x in list_group]
+
+    for x,y in zip(group_name, list_group):
+        mapping_cluster[x]["waybills"] = []
+    for x,y in zip(group_name, list_group):
+        mapping_cluster[x]["waybills"] = mapping_cluster[x]["waybills"] + y
+    for x in mapping_cluster:
+        mapping_cluster[x]["num_of_waybills"] = len(mapping_cluster[x]["waybills"])
+        
+
+    list_permutations_maps = [x for x in itertools.combinations(mapping_cluster.keys(), 2)]
+    dict_similarity_maps = {x: max(ospm_adj(standarized_address(x[0]), standarized_address(x[1])),
+                                contain_(standarized_address(x[0]), standarized_address(x[1]))) for x in list_permutations_maps}
+    G = nx.Graph()
+    G.add_nodes_from([(x, {"label": x}) for x in mapping_cluster.keys()])
+    G.add_edges_from([x for x in list(dict_similarity_maps.keys()) if dict_similarity_maps[x]>0.85])
+    list_group_maps = list(nx.algorithms.components.connected_components(G))
+    list_group_maps = [list(x) for x in list_group_maps]
+    mapping_cluster_final = {max(x, key=lambda x: (-x.count(" "), -len(x))): {"waybills": [m for k in x for m in mapping_cluster[k]['waybills']]} for x in list_group_maps}
+    for key, val in mapping_cluster_final.items():
+        mapping_cluster_final[key]["num_of_waybills"] = len(val["waybills"])
+    mapping_cluster_final = {x[2:].title() if "jl" in x[:3].lower() else x:y for x,y in mapping_cluster_final.items()}
+    mapps = {i:x for x,y in mapping_cluster_final.items() for i in y["waybills"]}
+    nodes["cluster"] = [mapps[x] for x in nodes.waybill_no]
+    nodes["sub_cluster"] = nodes.waybill_no
+    for cluster, data in mapping_cluster_final.items():
+        df2 = nodes.loc[nodes.waybill_no.isin(data["waybills"])]
+        df_group = df2.groupby(["recipient_address"]).agg({"waybill_no": [list], "extracted_address": [pd.Series.mode]})
+        df_group.reset_index(inplace=True)
+        df_group.columns = ["recipient_address", "waybills", "extracted_address"]
+        data = {x:{**y, **{"full_address":x, "waybills":z}} for x,y,z in zip(df_group.recipient_address, df_group.extracted_address, df_group.waybills)}
+        list_permutations = [x for x in itertools.combinations(data.keys(), 2)]
+        if len(list_permutations) > 0:
+            dict_similarity = {x: min(
+                ospm(standarized_address(clean_address(data[x[0]]['building_name_address'])), 
+                                standarized_address(clean_address(data[x[1]]['building_name_address']))),
+    #             mean([ospm(standarized_address(data[x[0]]['road_address']), 
+    #                                        standarized_address(data[x[1]]['road_address'])), 
+    #                                       ospm("".join((data[x[0]]['number_address']).lower()),
+    #                                        "".join((data[x[1]]['number_address']).lower()))]),
+                            jaro.jaro_winkler_metric(standarized_address(clean_address(data[x[0]]['building_name_address'])), 
+                                standarized_address(clean_address(data[x[1]]['building_name_address'])))) for x in list_permutations}
+            G = nx.Graph()
+            G.add_nodes_from([(x, {**{"label": x}, **y}) for x,y in zip(df_group.recipient_address, df_group.extracted_address)])
+            G.add_edges_from([x for x in list(dict_similarity.keys()) if dict_similarity[x]>=0.8 or len(set(standarized_building(data[x[0]]['building_name_address']).split()) &
+                                                                                                    set(standarized_building(data[x[1]]['building_name_address']).split())) > 1])
+            list_group_ = list(nx.algorithms.components.connected_components(G))
+            list_group_ = [list(x) for x in list_group_]
+            
+            building_name = [(" ".join(sorted([standarized_building(data[y]['building_name_address']).upper() for y in x], key = lambda x: -len(x)))
+                            , len(x)) for x in list_group_]
+            build_names = [x[0] for x in building_name]
+            building_name = [{word: count for word, count in collections.Counter(x[0].split()).items() if count >= ((x[1]//2) + 1) and word.isalpha()} for x in building_name]
+            
+            group_name = [" ".join(list(dict.fromkeys([l for l in y.split() if l in x.keys()]))) for x,y in zip(building_name, build_names)]
+            mapping_cluster_building = {x:{} for x in group_name}
+            
+            list_group_ = [[z for y in x for z in data[y]["waybills"]] for x in list_group_]
+            
+            for x,y in zip(group_name, list_group_):
+                mapping_cluster_building[x]["waybills"] = []
+            for x,y in zip(group_name, list_group_):
+                mapping_cluster_building[x]["waybills"] = mapping_cluster_building[x]["waybills"] + y
+            for x in mapping_cluster_building:
+                mapping_cluster_building[x]["num_of_waybills"] = len(mapping_cluster_building[x]["waybills"])
+                
+            if cluster.lower() == "jendral sudirman":
+                print(build_names)
+            
+            list_permutations_maps = [x for x in itertools.combinations(mapping_cluster_building.keys(), 2)]
+            dict_similarity_maps = {x: jaro.jaro_winkler_metric(standarized_building(x[0]), standarized_building(x[1]))
+                                    if standarized_building(x[0]) != "" or standarized_building(x[1]) != "" else 0 for x in list_permutations_maps}
+            G = nx.Graph()
+            G.add_nodes_from([(x, {"label": x}) for x in mapping_cluster_building.keys()])
+            G.add_edges_from([x for x in list(dict_similarity_maps.keys()) if dict_similarity_maps[x]>0.9])
+            list_group_maps = list(nx.algorithms.components.connected_components(G))
+            
+            list_group_maps = [sorted(list(x), key=lambda x: -len(x)) for x in list_group_maps]
+            mapping_cluster_final_building = {max(x, key=lambda x: (-x.count(" "), -len(x))): {"waybills": [m for k in x for m in mapping_cluster_building[k]['waybills']]} for x in list_group_maps}
+            
+            for key, val in mapping_cluster_final_building.items():
+                mapping_cluster_final_building[key]["num_of_waybills"] = len(val["waybills"])
+            mapping_cluster_final_building = {x[2:].title() if "jl" in x[:3].lower() else x:y for x,y in mapping_cluster_final_building.items()}
+            mapps_building = {i:x.title() for x,y in mapping_cluster_final_building.items() for i in y["waybills"]}
+            nodes["sub_cluster"] = nodes.sub_cluster.replace(mapps_building)
+        else:
+            mapps_building = {z:standarized_building(y["building_name_address"]).title() for x,y in data.items() for z in y["waybills"]}
+            nodes["sub_cluster"] = nodes.sub_cluster.replace(mapps_building)
     return nodes.loc[:, [x for x in nodes.columns if x != "extracted_address"]]
