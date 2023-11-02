@@ -547,7 +547,7 @@ def construct_address(data, district, city):
 def create_format_address(row):
     data = row["extracted_address"]
     address = row 
-    return (f"{data['building_name_address']} " + construct_address(data, address['district'], address['city']) + f" {address['province']}").strip().lower()
+    return (f"{data['building_name_address']} " + construct_address(data, address['district'], address['city'])).strip().lower()
 
 def cluster_waybill(nodes, url):
     nodes.columns = ["waybill_no", "recipient_address", "district", "city"]
