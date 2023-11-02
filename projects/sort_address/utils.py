@@ -532,6 +532,23 @@ def sort_waybill_addrress(nodes, url):
             nodes["sub_cluster"] = nodes.sub_cluster.replace(mapps_building)
     nodes.sort_values(by=["cluster", "sub_cluster", "recipient_address"], inplace=True)
 
+def construct_address(data, district, city):
+    blok = f"blok {data['block_address']}" if data["block_address"] != "" else ""
+    nomor = f"no {data['number_address']}" if data["number_address"] != "" else ""
+    rt = f"rt {data['rt_address']}" if data["rt_address"] != "" else ""
+    rw = f"rw {data['rw_address']}" if data["rw_address"] != "" else ""
+    if data['road_address'] != "":
+        address = f"jalan {data['road_address']} {blok} {nomor} {district} {city}"
+    else:
+        address = f"{blok} {nomor} {rt} {rw} {district} {city}"
+    address = " ".join(address.split())
+    return address.strip()
+
+def create_format_address(row):
+    data = row["extracted_address"]
+    address = row 
+    return (f"{data['building_name_address']} " + construct_address(data, address['district'], address['city']) + f" {address['province']}").strip().lower()
+
 def cluster_waybill(nodes, url):
     nodes.columns = ["waybill_no", "recipient_address", "district", "city"]
     map_extracted = extract_address_bulk(nodes, url)
@@ -655,4 +672,5 @@ def cluster_waybill(nodes, url):
         else:
             mapps_building = {z:standarized_building(y["building_name_address"]).title() for x,y in data.items() for z in y["waybills"]}
             nodes["sub_cluster"] = nodes.sub_cluster.replace(mapps_building)
-    return nodes.loc[:, [x for x in nodes.columns if x != "extracted_address"]]
+    nodes["formatted_address"] = nodes.apply(create_format_address, axis = 1)
+    return nodes.loc[:, [x for x in nodes.columns if x not in ["extracted_address", "clean_address"]]]
