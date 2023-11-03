@@ -298,6 +298,8 @@ def ospm_adj(s1: str, s2: str) -> float:
         string_temp = s1
         s1 = s2
         s2 = string_temp
+    if len(s2) == 0:
+        return 0
     if len(s1)/len(s2) < 0.25 and len(s1) <= 3:
         return 0
     else:
