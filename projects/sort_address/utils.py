@@ -551,6 +551,23 @@ def create_format_address(row):
     address = row 
     return (f"{data['building_name_address']} " + construct_address(data, address['district'], address['city'])).strip().lower()
 
+def cluster_waybill_url(nodes, url):
+    nodes.columns = ["waybill_no", "raw_address", "district", "city", "province"]
+    data = []
+    for index, row in nodes.iterrows():
+        temp = {"waybill_no": row["waybill_no"], "raw_address": row["raw_address"], "district": row["district"], 
+                "city": row["city"], "province": row["province"]}
+        data.append(temp)
+    payload = json.dumps({
+        "data": data
+        })
+    headers = { 'Content-Type': 'application/json' }
+    response = requests.request("POST", url+"/v1/athletics", headers=headers, data=payload)
+    response = response.json()
+    df = pd.DataFrame(response["data"])
+    return df
+
+
 def cluster_waybill(nodes, url):
     nodes.columns = ["waybill_no", "recipient_address", "district", "city"]
     map_extracted = extract_address_bulk(nodes, url)

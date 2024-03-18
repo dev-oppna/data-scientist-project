@@ -1,6 +1,6 @@
 import streamlit as st
 from projects.gender_detection.utils import predict, make_gauge as mg, make_barplot
-from projects.sort_address.utils import sort_waybill, sort_waybill_addrress, cluster_waybill
+from projects.sort_address.utils import sort_waybill, sort_waybill_addrress, cluster_waybill, cluster_waybill_url
 from projects.name_correction.utils import get_name, make_gauge, make_graph
 from projects.merchant_categorization.utils import merchant_predict, merchant_clean
 from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
@@ -81,16 +81,19 @@ if projects == "Home":
     if not st.session_state.set_address:
         with st.form("set_ngrok_url", clear_on_submit=False):
             address_url = st.text_input("Address extraction url")
+            address_cluster_url = st.text_input("Address cluster url")
             api_key_here = st.text_input("API Key")
             if st.form_submit_button("Store this urls"):
                 st.session_state.set_address = True
                 st.session_state.set_waybill = True
                 st.session_state.address_url = address_url
                 st.session_state.api_key_here = api_key_here
+                st.session_state.address_cluster_url = address_cluster_url
                 st.experimental_rerun()
 
     else:
         st.write("Address extraction url:",st.session_state.address_url)
+        st.write("Address cluster url:",st.session_state.address_cluster_url)
         st.write("API Key:",st.session_state.api_key_here)
         if st.button('Reset urls'):
             st.session_state.set_address = False
@@ -222,13 +225,14 @@ elif projects == "Sort waybill":
                 address_col = col2.text_input("Kolom address", key="address_col")
                 district_col = col3.text_input("Kolom district", key="district_col")
                 city_col = col4.text_input("Kolom city", key="city_col")
+                province_col = col4.text_input("Kolom province", key="province_col")
                 submit_address = st.form_submit_button("Sort this address")
                 if submit_address:
-                    nodes = df.loc[:,[waybill_col, address_col, district_col, city_col ]].copy()
+                    nodes = df.loc[:,[waybill_col, address_col, district_col, city_col, province_col ]].copy()
                     # routes, distance, fig = sort_waybill(nodes)
                     with st.spinner(text="Creating your cluster..."):
                         # routes = sort_waybill_addrress(nodes, st.session_state.address_url)
-                        routes = cluster_waybill(nodes, st.session_state.address_url)
+                        routes = cluster_waybill_url(nodes, st.session_state.address_cluster_url)
                     st.dataframe(routes)
                     # st.write(f"Total distance: {distance}")
                     # st.pyplot(fig)
