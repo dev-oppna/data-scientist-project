@@ -33,7 +33,8 @@ st.write('<style>div.row-widget.stRadio > div{flex-direction:row;}</style>', uns
 @st.cache(suppress_st_warning=True)
 def get_all_df():
     engine = create_engine(f'postgresql://{DB_URL}')
-    all_df = pd.read_sql_query('select * from data',con=engine) # This makes the function take 2s to run
+    with engine.connect() as conn:
+        all_df = pd.read_sql_query('select * from data',con=conn.connection) # This makes the function take 2s to run
     all_df.top_spend_ecommerce_category = all_df.top_spend_ecommerce_category.fillna("No Category")
     return all_df
 
