@@ -562,9 +562,10 @@ def cluster_waybill_url(nodes, url):
         "data": data
         })
     headers = { 'Content-Type': 'application/json' }
-    response = requests.request("POST", url+"/v1/athletics", headers=headers, data=payload)
+    response = requests.request("POST", url, headers=headers, data=payload)
     response = response.json()
     df = pd.DataFrame(response["data"])
+    df = df.sort_values(by=["cluster", "subcluster"], ascending=[True, True])
     return df
 
 

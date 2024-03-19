@@ -240,7 +240,7 @@ elif projects == "Sort waybill":
                 st.download_button(
                     label="Download data as CSV",
                     data= convert_csv_general(routes),
-                    file_name=f'routes.csv',
+                    file_name=f'result_{waybill_file_excel.name}',
                     mime='text/csv',
                 )
     else:
