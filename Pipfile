@@ -20,6 +20,7 @@ haversine = "==2.8.0"
 altair = "==4.0"
 matplotlib = "==3.7.2"
 jaro-winkler = "==2.0.3"
+numpy = "==1.25.2"
 
 [dev-packages]
 
