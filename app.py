@@ -7,6 +7,7 @@ from projects.address_verification.utils import get_status_address, extract_addr
 from projects.look_a_like.utils import generate_df, fit_PU_estimator, predict_PU_prob, plot_bar, create_df_lift, lift_reach_plot, \
     get_precision_recall, prec_recall_plot, generate_df_all, download_button, get_figure, generate_opa_id
 from projects.poc.utils import get_aggregated, get_detailed, transform_addresses, transform_state_court
+from projects.poc import DICT_CITY, LIST_CITY
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -58,6 +59,7 @@ def convert_csv_general(df):
 # all_df = get_all_df()
 if "load_state" not in st.session_state:
     st.session_state.load_state = False
+    st.session_state.select_city = False
     st.session_state.aggregated_state = False
     st.session_state.detailed_state = False
     st.session_state.model_trained = False
@@ -68,9 +70,11 @@ if "load_state" not in st.session_state:
     st.session_state.size = None
     st.session_state.filename = None
 
+# def change_city():
+#     st.session_state.select_city = 
 # load_models = st.cache(load_models, allow_output_mutation=True)
 
-st.title('Data Scientist Project')
+st.title('DEMO Product')
 
 
 projects = "POC"
@@ -407,21 +411,27 @@ elif projects == "Merchant Categorization Prediction":
 elif projects == "POC":
     st.session_state.load_state = False
     data = None
-    st.header("POC verification user")
-    # st.write('''Ini adalah model untuk mensorting alamat berdasarkan alamat terdekat dengan TH.''')
-    with st.form("sort_waybill_form", clear_on_submit=False):
-        col01, col02 = st.columns(2)
+    st.header("Enriching users data in seconds with AI - User Verifications")
+    st.write('''Disclaimer: This page is for demonstration purposes only, showcasing the Data Input and Output of our product. In a real scenario, our product can be accessed via API calls integrated with your system.''')
+    with st.form("input_pii", clear_on_submit=False):
+        col01, col02, col03 = st.columns(3)
         col1, col2, col3 = st.columns(3)
-        name = col01.text_input("Name (Required)", key="name")
+        col001, _, _ = st.columns(3)
+        name = col01.text_input("Full Name (Required)", key="name")
         phone = col02.text_input("Phone (Required)", key="phone", placeholder="628XXXXXX")
+        nik = col03.text_input("NIK", key="nik")
         
-        city = col1.text_input("City (Required)", key="city")
-        district = col2.text_input("District (Required)", key="district")
-        address = col3.text_input("Address (Required)", key="address")
+        address = col1.text_input("Address (Required)", key="address")
+        city = col3.selectbox("City (Required)", LIST_CITY, key="city")
+        st.write(f"Your city: {city}")
+        district = col2.selectbox("District (Required)", DICT_CITY[city], key="district")
+        st.write(f"Your district: {district}")
+        
+        
 
-        nik = col3.text_input("NIK", key="nik")
-        email = col1.text_input("Email", key="email", placeholder="aaaa@gmail.com")
-        phone_related = col2.text_input("Phone related", key="phone_related", placeholder="628XXXXXX")
+        
+        email = col001.text_input("Email", key="email", placeholder="aaaa@gmail.com")
+        # phone_related = col2.text_input("Phone related", key="phone_related", placeholder="628XXXXXX")
         
         submit_data = st.form_submit_button("Search this data")
         st.markdown("""---""")
@@ -433,15 +443,20 @@ elif projects == "POC":
                 data = get_aggregated(name=name, phone=phone, address=address, nik=nik, email=email, city=city, district=district)
             data = data["data"]
             st.subheader("Offline presence")
-            col11, col12, col13 = st.columns(3)
 
+            col11, col12 = st.columns(2)
+            col21, col22, col23 = st.columns(3)
+            opa_id = ""
+            same_person = "Not known"
             data_found = "Available" if data.get("opa") else "Unavailable"
-            address_match = data.get("is_address_match")
+            address_match = str(data.get("is_address_match")).upper()
             number_address = 0
             phone_rels = 0
             phone_rels_fraud = 0
 
             if data.get("opa"):
+                opa_id = data.get("opa").get("opa_id")
+                same_person = "TRUE" if data.get("opa").get("name_similarity") > 0.7 else "FALSE"
                 number_address = data.get("addresses")
                 phone_rels = data.get("opa").get("freq_all_data_shared")
                 phone_rels_fraud = data.get("opa").get("freq_fraud_shared")
@@ -450,18 +465,21 @@ elif projects == "POC":
             social_medias = data.get("social_media")
             facebook = social_medias["facebook"]
             twitter = social_medias["twitter"]
-            
-            is_data_found = col11.text_input("Is data found", key="is_data_found", value=data_found, disabled=True)
+
+            opa_id = col11.text_input("Opa id", key="opa_id", value=opa_id, disabled=True)
+            is_data_found = col12.text_input("Data availibility", key="is_data_found", value=data_found, disabled=True)
+            is_same_person = col11.text_input("Is same person", key="is_same_person", value=address_match, disabled=True)
             is_address_match = col12.text_input("Is address match", key="is_address_match", value=address_match, disabled=True)
-            number_addresses = col13.text_input("Addresses", key="number_addresses", value=f"{number_address}", disabled=True)
-            phone_relations = col11.text_input("Phone relations", key="phone_relations", value=f"{phone_rels}", disabled=True)
-            phone_relations_fraud = col12.text_input("Fraud phone relations", key="phone_relations_fraud", value=f"{phone_rels_fraud}", disabled=True)
+
+            number_addresses = col21.text_input("Number of addresses", key="number_addresses", value=f"{number_address}", disabled=True)
+            phone_relations = col22.text_input("Total Linked Phones", key="phone_relations", value=f"{phone_rels}", disabled=True)
+            phone_relations_fraud = col23.text_input("Total Linked Fraud Phones", key="phone_relations_fraud", value=f"{phone_rels_fraud}", disabled=True)
             
 
             st.subheader("Digital presence")
-            col21, col22 = st.columns(2)
-            has_facebook = col21.text_input("Has Facebook", key="has_facebook", value=f"{facebook}", disabled=True)
-            has_twitter = col22.text_input("Has Twitter", key="has_twitter", value=f"{twitter}", disabled=True)
+            col31, col32 = st.columns(2)
+            has_facebook = col31.text_input("Has Facebook", key="has_facebook", value=f"{facebook}", disabled=True)
+            has_twitter = col32.text_input("Has Twitter", key="has_twitter", value=f"{twitter}", disabled=True)
             has_criminal_records = st.text_input("Has court records", key="has_criminal_records", value=state_court, disabled=True)
             
             submit_detail_data = st.form_submit_button("Get detail of this data")
@@ -474,13 +492,18 @@ elif projects == "POC":
                 st.subheader("Details data")
                 df = pd.DataFrame(addresses_list)
                 df1 = pd.DataFrame(detailed_data["data"]["phones"])
+                if len(df1.columns) > 0:
+                    df1.columns = ["phone", "is_flag_negative"]
                 df2 = pd.DataFrame(state_court_list)
                 
-                st.write("Address data (Max 10 data show)")
-                st.dataframe(df, use_container_width=True)
-                st.write("Phone related data")
-                st.dataframe(df1.sort_values(by="is_fraud", ascending=False), use_container_width=True)
-                st.write("State court data")
+                st.write("Available Addresses Details (10 latest address used by the user)")
+                st.dataframe(df.head(10), use_container_width=True)
+                st.write("Linked Phones Details")
+                if len(df1.columns) > 0:
+                    st.dataframe(df1.sort_values(by="is_flag_negative", ascending=False), use_container_width=True)
+                else:
+                    st.dataframe(df1, use_container_width=True)
+                st.write("Legal Record Details")
                 st.dataframe(df2, use_container_width=True)
         elif submit_data:
             st.warning('Please fill the required field', icon="⚠️")        
