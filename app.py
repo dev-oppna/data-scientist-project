@@ -476,12 +476,12 @@ elif projects == "POC":
                 df1 = pd.DataFrame(detailed_data["data"]["phones"])
                 df2 = pd.DataFrame(state_court_list)
                 
-                st.write("Address data")
-                st.dataframe(df.head(), use_container_width=True)
+                st.write("Address data (Max 10 data show)")
+                st.dataframe(df, use_container_width=True)
                 st.write("Phone related data")
-                st.dataframe(df1.head(), use_container_width=True)
+                st.dataframe(df1.sort_values(by="is_fraud", ascending=False), use_container_width=True)
                 st.write("State court data")
-                st.dataframe(df2.head(), use_container_width=True)
+                st.dataframe(df2, use_container_width=True)
         elif submit_data:
             st.warning('Please fill the required field', icon="⚠️")        
                 
