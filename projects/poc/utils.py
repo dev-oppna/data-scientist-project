@@ -3,7 +3,7 @@ import json
 
 base_url = "https://api-stg.oppna.dev"
 
-def get_aggregated(name: str, nik: str, phone: str, address: str, email: str) -> dict:
+def get_aggregated(name: str, nik: str, phone: str, address: str, email: str, city: str, district: str) -> dict:
     headers = {
         "Content-Type": "application/json"
     }
@@ -12,7 +12,9 @@ def get_aggregated(name: str, nik: str, phone: str, address: str, email: str) ->
         "nik": nik,
         "phone": phone,
         "address": address,
-        "email": email
+        "email": email,
+        "city": city,
+        "district": district
     })
     ses = requests.session()
     try:
@@ -20,6 +22,7 @@ def get_aggregated(name: str, nik: str, phone: str, address: str, email: str) ->
         response = resp.json()
         return response
     except Exception as e:
+        raise e
         return {"data": None}
 
 def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> dict:
@@ -31,13 +34,14 @@ def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> d
         "nik": nik,
         "phone": phone,
         "address": address,
-        "email": email
+        "email": email,
+        "city": "abc",
+        "district": "bcsa"
     })
     ses = requests.session()
     try:
         resp = ses.post(f"{base_url}/v1/guardians/detailed", headers=headers, data=data)
         response = resp.json()
-        print(response)
         return response
     except Exception as e:
         return {}
