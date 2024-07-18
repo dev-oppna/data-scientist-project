@@ -22,7 +22,6 @@ def get_aggregated(name: str, nik: str, phone: str, address: str, email: str, ci
         response = resp.json()
         return response
     except Exception as e:
-        raise e
         return {"data": None}
 
 def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> dict:

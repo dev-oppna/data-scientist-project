@@ -413,28 +413,23 @@ elif projects == "POC":
     data = None
     st.header("Enriching users data in seconds with AI - User Verifications")
     st.write('''Disclaimer: This page is for demonstration purposes only, showcasing the Data Input and Output of our product. In a real scenario, our product can be accessed via API calls integrated with your system.''')
+    col01, col02, col03 = st.columns(3)
+    col1, col2, col3 = st.columns(3)
+    col001, _, _ = st.columns(3)
+    name = col01.text_input("Full Name (Required)", key="name")
+    phone = col02.text_input("Phone (Required)", key="phone", placeholder="628XXXXXX")
+    nik = col03.text_input("NIK", key="nik")
+    
+    address = col1.text_input("Address (Required)", key="address")
+    city = col3.selectbox("City (Required)", LIST_CITY, key="city")
+    district = col2.selectbox("District (Required)", DICT_CITY[city], key="district")
+    
+    email = col001.text_input("Email", key="email", placeholder="aaaa@gmail.com")
     with st.form("input_pii", clear_on_submit=False):
-        col01, col02, col03 = st.columns(3)
-        col1, col2, col3 = st.columns(3)
-        col001, _, _ = st.columns(3)
-        name = col01.text_input("Full Name (Required)", key="name")
-        phone = col02.text_input("Phone (Required)", key="phone", placeholder="628XXXXXX")
-        nik = col03.text_input("NIK", key="nik")
         
-        address = col1.text_input("Address (Required)", key="address")
-        city = col3.selectbox("City (Required)", LIST_CITY, key="city")
-        st.write(f"Your city: {city}")
-        district = col2.selectbox("District (Required)", DICT_CITY[city], key="district")
-        st.write(f"Your district: {district}")
-        
-        
-
-        
-        email = col001.text_input("Email", key="email", placeholder="aaaa@gmail.com")
         # phone_related = col2.text_input("Phone related", key="phone_related", placeholder="628XXXXXX")
         
         submit_data = st.form_submit_button("Search this data")
-        st.markdown("""---""")
         
         # if submit_data and name and phone:
         if (submit_data or st.session_state.aggregated_state) and name and phone and address and city and district:
@@ -468,7 +463,7 @@ elif projects == "POC":
 
             opa_id = col11.text_input("Opa id", key="opa_id", value=opa_id, disabled=True)
             is_data_found = col12.text_input("Data availibility", key="is_data_found", value=data_found, disabled=True)
-            is_same_person = col11.text_input("Is same person", key="is_same_person", value=address_match, disabled=True)
+            is_same_person = col11.text_input("Is same person", key="is_same_person", value=same_person, disabled=True)
             is_address_match = col12.text_input("Is address match", key="is_address_match", value=address_match, disabled=True)
 
             number_addresses = col21.text_input("Number of addresses", key="number_addresses", value=f"{number_address}", disabled=True)
@@ -500,7 +495,7 @@ elif projects == "POC":
                 st.dataframe(df.head(10), use_container_width=True)
                 st.write("Linked Phones Details")
                 if len(df1.columns) > 0:
-                    st.dataframe(df1.sort_values(by="is_flag_negative", ascending=False), use_container_width=True)
+                    st.dataframe(df1.sort_values(by="is_flag_negative", ascending=False).reset_index(drop=True), use_container_width=True)
                 else:
                     st.dataframe(df1, use_container_width=True)
                 st.write("Legal Record Details")
