@@ -70,11 +70,9 @@ if "load_state" not in st.session_state:
     st.session_state.size = None
     st.session_state.filename = None
 
-# def change_city():
-#     st.session_state.select_city = 
-# load_models = st.cache(load_models, allow_output_mutation=True)
 
-st.title('DEMO Product')
+st.image("assets/logo.png", width=200)
+st.title('Demo Product')
 
 
 projects = "POC"
