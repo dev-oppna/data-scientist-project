@@ -6,6 +6,7 @@ from projects.merchant_categorization.utils import merchant_predict, merchant_cl
 from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
 from projects.look_a_like.utils import generate_df, fit_PU_estimator, predict_PU_prob, plot_bar, create_df_lift, lift_reach_plot, \
     get_precision_recall, prec_recall_plot, generate_df_all, download_button, get_figure, generate_opa_id
+from projects.poc.utils import get_aggregated, get_detailed, transform_addresses, transform_state_court
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
 from sklearn.neighbors import KNeighborsClassifier
@@ -57,6 +58,7 @@ def convert_csv_general(df):
 all_df = get_all_df()
 if "load_state" not in st.session_state:
     st.session_state.load_state = False
+    st.session_state.aggregated_state = False
     st.session_state.model_trained = False
     st.session_state.set_address = False
     st.session_state.set_waybill = False
@@ -70,9 +72,9 @@ if "load_state" not in st.session_state:
 st.title('Data Scientist Project')
 
 
-projects = "Home"
+projects = "POC"
 
-projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction","Merchant Categorization Prediction", "Address Verification", "Sort waybill", "Look a like"])
+# projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction","Merchant Categorization Prediction", "Address Verification", "Sort waybill", "Look a like", "POC"])
 
 if projects == "Home":
     st.session_state.load_state = False
@@ -401,3 +403,78 @@ elif projects == "Merchant Categorization Prediction":
         st.image(merchant_cat_image)
 
 
+elif projects == "POC":
+    st.session_state.load_state = False
+    st.header("POC verification user")
+    # st.write('''Ini adalah model untuk mensorting alamat berdasarkan alamat terdekat dengan TH.''')
+    with st.form("sort_waybill_form", clear_on_submit=False):
+        col01, col02 = st.columns(2)
+        col1, col2, col3, col4 = st.columns(4)
+        name = col01.text_input("Name (Required)", key="name")
+        phone = col02.text_input("Phone (Required)", key="phone", placeholder="628XXXXXX")
+        address = col3.text_input("Address", key="address")
+        nik = col4.text_input("NIK", key="nik")
+
+        email = col1.text_input("Email", key="email", placeholder="aaaa@gmail.com")
+        phone_related = col2.text_input("Phone related", key="phone_related", placeholder="628XXXXXX")
+        submit_data = st.form_submit_button("Search this data")
+        st.markdown("""---""")
+        # if submit_data and name and phone:
+        if (submit_data or st.session_state.aggregated_state) and name and phone and address:
+            st.session_state.aggregated_state = True
+            with st.spinner(text="Searching your data..."):
+                data = get_aggregated(name=name, phone=phone, address=address, nik=nik, email=email)
+                data = data["data"]
+                st.subheader("Offline presence")
+                col11, col12, col13 = st.columns(3)
+
+                data_found = "Available" if data.get("opa") else "Unavailable"
+                address_match = "Unavailable"
+                number_address = 0
+                phone_rels = 0
+                phone_rels_fraud = 0
+
+                if data.get("opa"):
+                    number_address = data.get("addresses")
+                    phone_rels = data.get("opa").get("freq_all_data_shared")
+                    phone_rels_fraud = data.get("opa").get("freq_fraud_shared")
+
+                state_court = "Available" if data.get("state_court") > 0 else "Unavailable"
+                social_medias = data.get("social_media")
+                facebook = social_medias["facebook"]
+                twitter = social_medias["twitter"]
+                
+                is_data_found = col11.text_input("Is data found", key="is_data_found", value=data_found, disabled=True)
+                is_address_match = col12.text_input("Is address match", key="is_address_match", value=address_match, disabled=True)
+                number_addresses = col13.text_input("Addresses", key="number_addresses", value=f"{number_address}", disabled=True)
+                phone_relations = col11.text_input("Phone relations", key="phone_relations", value=f"{phone_rels}", disabled=True)
+                phone_relations_fraud = col12.text_input("Fraud phone relations", key="phone_relations_fraud", value=f"{phone_rels_fraud}", disabled=True)
+                
+
+                st.subheader("Digital presence")
+                col21, col22 = st.columns(2)
+                has_facebook = col21.text_input("Has Facebook", key="has_facebook", value=f"{facebook}", disabled=True)
+                has_twitter = col22.text_input("Has Twitter", key="has_twitter", value=f"{twitter}", disabled=True)
+                has_criminal_records = st.text_input("Has court records", key="has_criminal_records", value=state_court, disabled=True)
+                
+                submit_detail_data = st.form_submit_button("Get detail of this data")
+                st.markdown("""---""")
+                
+                if submit_detail_data and st.session_state.aggregated_state:
+                    with st.spinner(text="Get details of your data..."):
+                        detailed_data = get_detailed(name=name, phone=phone, address=address, nik=nik, email=email)
+                        state_court_list = transform_state_court(detailed_data["data"]["state_court"])
+                        addresses_list = transform_addresses(detailed_data["data"]["addresses"])
+                        st.subheader("Details data")
+                        df = pd.DataFrame(addresses_list)
+                        df1 = pd.DataFrame(detailed_data["data"]["phones"])
+                        df2 = pd.DataFrame(state_court_list)
+                        
+                        st.write("Address data")
+                        st.dataframe(df.head(), use_container_width=True)
+                        st.write("Phone related data")
+                        st.dataframe(df1.head(), use_container_width=True)
+                        st.write("State court data")
+                        st.dataframe(df2.head(), use_container_width=True)
+        elif submit_data:
+            st.warning('Please fill the required field', icon="⚠️")
