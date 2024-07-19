@@ -463,7 +463,7 @@ elif projects == "POC":
             col21, col22, col23 = st.columns(3)
             number_addresses = col21.text_input("Number of addresses", key="number_addresses", value=f"{number_address}", disabled=True)
             phone_relations = col22.text_input("Total Linked Phones", key="phone_relations", value=f"{phone_rels}", disabled=True)
-            phone_relations_fraud = col23.text_input("Total Linked Fraud Phones", key="phone_relations_fraud", value=f"{phone_rels_fraud}", disabled=True)
+            phone_relations_fraud = col23.text_input("Total Linked Negative Phones", key="phone_relations_fraud", value=f"{phone_rels_fraud}", disabled=True)
 
             st.subheader("Social Media Presence (Email)")
             col31, col32 = st.columns(2)
