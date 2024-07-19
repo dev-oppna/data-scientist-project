@@ -414,31 +414,26 @@ elif projects == "POC":
     col01, col02, col03 = st.columns(3)
     col1, col2, col3 = st.columns(3)
     col001, _, _ = st.columns(3)
-    name = col01.text_input("Full Name (Required)", key="name")
+    name = col01.text_input("Full Name", key="name")
     phone = col02.text_input("Phone (Required)", key="phone", placeholder="628XXXXXX")
     nik = col03.text_input("NIK", key="nik")
     
-    address = col1.text_input("Address (Required)", key="address")
-    city = col3.selectbox("City (Required)", LIST_CITY, key="city")
-    district = col2.selectbox("District (Required)", DICT_CITY[city], key="district")
+    address = col1.text_input("Address", key="address")
+    city = col3.selectbox("City", LIST_CITY, key="city")
+    district = col2.selectbox("District", DICT_CITY[city], key="district")
     
     email = col001.text_input("Email", key="email", placeholder="aaaa@gmail.com")
     with st.form("input_pii", clear_on_submit=False):
         
-        # phone_related = col2.text_input("Phone related", key="phone_related", placeholder="628XXXXXX")
-        
         submit_data = st.form_submit_button("Search this data")
-        
-        # if submit_data and name and phone:
+
         if (submit_data or st.session_state.aggregated_state) and name and phone and address and city and district:
             st.session_state.aggregated_state = True
             with st.spinner(text="Searching your data..."):
                 data = get_aggregated(name=name, phone=phone, address=address, nik=nik, email=email, city=city, district=district)
             data = data["data"]
-            st.subheader("Offline presence")
-
+            st.subheader("Data Checking (Name,Phone and Address)")
             col11, col12 = st.columns(2)
-            col21, col22, col23 = st.columns(3)
             opa_id = ""
             same_person = "Not known"
             data_found = "Available" if data.get("opa") else "Unavailable"
@@ -464,15 +459,17 @@ elif projects == "POC":
             is_same_person = col11.text_input("Is same person", key="is_same_person", value=same_person, disabled=True)
             is_address_match = col12.text_input("Is address match", key="is_address_match", value=address_match, disabled=True)
 
+            st.subheader("Additional Information")
+            col21, col22, col23 = st.columns(3)
             number_addresses = col21.text_input("Number of addresses", key="number_addresses", value=f"{number_address}", disabled=True)
             phone_relations = col22.text_input("Total Linked Phones", key="phone_relations", value=f"{phone_rels}", disabled=True)
             phone_relations_fraud = col23.text_input("Total Linked Fraud Phones", key="phone_relations_fraud", value=f"{phone_rels_fraud}", disabled=True)
-            
 
-            st.subheader("Digital presence")
+            st.subheader("Social Media Presence (Email)")
             col31, col32 = st.columns(2)
             has_facebook = col31.text_input("Has Facebook", key="has_facebook", value=f"{facebook}", disabled=True)
             has_twitter = col32.text_input("Has Twitter", key="has_twitter", value=f"{twitter}", disabled=True)
+            st.subheader("Legal Records")
             has_criminal_records = st.text_input("Has court records", key="has_criminal_records", value=state_court, disabled=True)
             
             submit_detail_data = st.form_submit_button("Get detail of this data")
