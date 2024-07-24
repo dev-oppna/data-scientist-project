@@ -6,7 +6,7 @@ from projects.merchant_categorization.utils import merchant_predict, merchant_cl
 from projects.address_verification.utils import get_status_address, extract_address, get_score, construct_address
 from projects.look_a_like.utils import generate_df, fit_PU_estimator, predict_PU_prob, plot_bar, create_df_lift, lift_reach_plot, \
     get_precision_recall, prec_recall_plot, generate_df_all, download_button, get_figure, generate_opa_id
-from projects.poc.utils import get_aggregated, get_detailed, transform_addresses, transform_state_court
+from projects.poc.utils import get_aggregated, get_detailed, transform_addresses, transform_state_court, get_detailed_retrieve_phone, get_opas_by_address, masking_name
 from projects.poc import DICT_CITY, LIST_CITY
 from sklearn.metrics import accuracy_score, recall_score, precision_score
 from sklearn.model_selection import train_test_split
@@ -75,7 +75,7 @@ st.image("assets/logo.png", width=200)
 st.title('Demo Product')
 
 
-projects = "POC"
+projects = st.sidebar.selectbox("Projects", ["POC", "Retrieval", "Retrieval Address"])
 
 # projects = st.sidebar.selectbox("Projects", ["Home", "Name Correction", "Gender Prediction","Merchant Categorization Prediction", "Address Verification", "Sort waybill", "Look a like", "POC"])
 
@@ -495,6 +495,60 @@ elif projects == "POC":
                     st.dataframe(df1, use_container_width=True)
                 st.write("Legal Record Details")
                 st.dataframe(df2, use_container_width=True)
+        elif submit_data:
+            st.warning('Please fill the required field', icon="⚠️")        
+                
+elif projects == "Retrieval":
+    st.session_state.load_state = False
+    data = None
+    st.header("Enriching users data in seconds with AI - User Verifications")
+    st.write('''By Phone opa''')
+    with st.form("input_pii", clear_on_submit=False):
+        col01, col02, col03 = st.columns(3)
+        name = col01.text_input("Full Name", key="name")
+        phone = col02.text_input("Phone or Opa Id (Required)", key="phone", placeholder="628XXXXXX/67762xxx")
+        nik = col03.text_input("NIK", key="nik")
+        submit_data = st.form_submit_button("Search this data")
+        if submit_data and name and phone:
+            st.session_state.aggregated_state = True
+            with st.spinner(text="Searching your data..."):
+                detailed_data = get_detailed_retrieve_phone(name=name, phone=phone)
+            addresses_list = transform_addresses(detailed_data["data"]["addresses"])
+            st.subheader("Details data")
+            df = pd.DataFrame(addresses_list)
+            df1 = pd.DataFrame(detailed_data["data"]["phones"])
+            if len(df1.columns) > 0:
+                df1.columns = ["phone", "is_flag_negative"]
+            
+            st.write("Available Addresses Details (10 latest address used by the user)")
+            st.dataframe(df.head(10), use_container_width=True)
+            st.write("Linked Phones Details")
+            if len(df1.columns) > 0:
+                st.dataframe(df1.sort_values(by="is_flag_negative", ascending=False).reset_index(drop=True), use_container_width=True)
+            else:
+                st.dataframe(df1, use_container_width=True)
+        elif submit_data:
+            st.warning('Please fill the required field', icon="⚠️")        
+                
+elif projects == "Retrieval Address":
+    st.session_state.load_state = False
+    data = None
+    st.header("Enriching users data in seconds with AI - User Verifications")
+    st.write('''By address''')
+    with st.form("input_pii", clear_on_submit=False):
+        submit_data = st.form_submit_button("Search this data")
+        address_id = st.text_input("Address Id (Required)", key="address_id")
+        if submit_data and address_id:
+            st.session_state.aggregated_state = True
+            with st.spinner(text="Searching your data..."):
+                detailed_data = get_opas_by_address(address_id=address_id)
+            st.subheader("Details data")
+            data_phones = [{key :val for key, val in x.items() if key in ["opa_id", "name"]} for x in detailed_data["data"]["phones"]]
+            df1 = pd.DataFrame(data_phones)
+            if len(df1.columns) > 0:
+                df1["connected_by"] = "Address"
+                df1["name"] = df1.name.apply(masking_name)
+            st.dataframe(df1, use_container_width=True)
         elif submit_data:
             st.warning('Please fill the required field', icon="⚠️")        
                 

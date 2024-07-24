@@ -45,6 +45,52 @@ def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> d
     except Exception as e:
         return {}
     
+def get_detailed_retrieve_phone(name: str, phone: str) -> dict:
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = json.dumps({
+        "name": name,
+        "nik": "-",
+        "phone": phone,
+        "address": "-",
+        "email": "-",
+        "city": "abc",
+        "district": "bcsa"
+    })
+    ses = requests.session()
+    try:
+        resp = ses.post(f"{base_url}/v1/guardians/retrieve", headers=headers, data=data)
+        response = resp.json()
+        return response
+    except Exception as e:
+        return {}
+    
+def get_opas_by_address(address_id: str) -> dict:
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = json.dumps({
+        "address_id": address_id
+    })
+    ses = requests.session()
+    try:
+        resp = ses.post(f"{base_url}/v1/guardians/address/opas", headers=headers, data=data)
+        response = resp.json()
+        return response
+    except Exception as e:
+        return {}
+    
+def masking_static(x: str) -> str:
+    if len(x) > 2:
+        x = "".join([k if ind < 2 else "*" for ind, k in enumerate(x)])
+    return x
+    
+def masking_name(name: str) -> str:
+    name = name.split()
+    name = [masking_static(x) for x in name]
+    return " ".join(name)
+    
 def transform_state_court(data: list) -> list:
     data_list = []
     for dat in data:
