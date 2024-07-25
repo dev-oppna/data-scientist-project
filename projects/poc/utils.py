@@ -102,5 +102,5 @@ def transform_state_court(data: list) -> list:
     return data_list
 
 def transform_addresses(data: list) -> list:
-    data = [{k:l for k,l in x.items() if k not in ["address_id", "completeness_level", "address_quality_score"]} for x in data]
+    data = [{k:l for k,l in x.items() if k in ["completeness_level", "address_quality_score"]} for x in data]
     return data
