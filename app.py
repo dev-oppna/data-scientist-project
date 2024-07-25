@@ -536,8 +536,8 @@ elif projects == "Retrieval Address":
     st.header("Enriching users data in seconds with AI - User Verifications")
     st.write('''By address''')
     with st.form("input_pii", clear_on_submit=False):
-        submit_data = st.form_submit_button("Search this data")
         address_id = st.text_input("Address Id (Required)", key="address_id")
+        submit_data = st.form_submit_button("Search this data")
         if submit_data and address_id:
             st.session_state.aggregated_state = True
             with st.spinner(text="Searching your data..."):
