@@ -77,7 +77,10 @@ def get_opas_by_address(address_id: str) -> dict:
     try:
         resp = ses.post(f"{base_url}/v1/guardians/address/opas", headers=headers, data=data)
         response = resp.json()
-        return response
+        if response["data"]:
+            return response
+        else:
+            return {"data": {"phone": []}}
     except Exception as e:
         return {}
     
