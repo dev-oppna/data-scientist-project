@@ -65,9 +65,9 @@ def get_detailed_retrieve_phone(name: str, phone: str) -> dict:
         if response["data"]:
             return response
         else:
-            return {"data": {"addresses": []}}
+            return {"data": {"addresses": [], "phones": []}}
     except Exception as e:
-        return {}
+        return {"data": {"addresses": [], "phones": []}}
     
 def get_opas_by_address(address_id: str) -> dict:
     headers = {
@@ -83,9 +83,9 @@ def get_opas_by_address(address_id: str) -> dict:
         if response["data"]:
             return response
         else:
-            return {"data": {"phone": []}}
+            return {"data": {"phones": []}}
     except Exception as e:
-        return {}
+        return {"data": {"phones": []}}
     
 def masking_static(x: str) -> str:
     if len(x) > 2:
