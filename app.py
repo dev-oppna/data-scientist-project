@@ -427,7 +427,7 @@ elif projects == "POC":
         
         submit_data = st.form_submit_button("Search this data")
 
-        if (submit_data or st.session_state.aggregated_state) and name and phone and address and city and district:
+        if submit_data and name and phone and address and city and district:
             st.session_state.aggregated_state = True
             with st.spinner(text="Searching your data..."):
                 data = get_aggregated(name=name, phone=phone, address=address, nik=nik, email=email, city=city, district=district)
@@ -543,6 +543,7 @@ elif projects == "Retrieval Address":
             with st.spinner(text="Searching your data..."):
                 detailed_data = get_opas_by_address(address_id=address_id)
             st.subheader("Details data")
+        
             data_phones = [{key :val for key, val in x.items() if key in ["opa_id", "name"]} for x in detailed_data["data"]["phones"]]
             df1 = pd.DataFrame(data_phones)
             if len(df1.columns) > 0:

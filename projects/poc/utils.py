@@ -60,9 +60,12 @@ def get_detailed_retrieve_phone(name: str, phone: str) -> dict:
     })
     ses = requests.session()
     try:
-        resp = ses.post(f"{base_url}/v1/guardians/retrieve", headers=headers, data=data)
+        resp = ses.post(f"{base_url}/v1/guardians/retrieve", headers=headers, data=data, timeout=3)
         response = resp.json()
-        return response
+        if response["data"]:
+            return response
+        else:
+            return {"data": {"addresses": []}}
     except Exception as e:
         return {}
     
@@ -75,7 +78,7 @@ def get_opas_by_address(address_id: str) -> dict:
     })
     ses = requests.session()
     try:
-        resp = ses.post(f"{base_url}/v1/guardians/address/opas", headers=headers, data=data)
+        resp = ses.post(f"{base_url}/v1/guardians/address/opas", headers=headers, data=data, timeout=3)
         response = resp.json()
         if response["data"]:
             return response
