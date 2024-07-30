@@ -42,7 +42,7 @@ with st.form("input_pii", clear_on_submit=False):
             detailed_data = get_detailed_retrieve_phone(name=name, phone=phone)
         addresses_list = transform_addresses(detailed_data["addresses"])
         st.subheader("Details data")
-        same_person = "Not known"
+        same_person = "NOT KNOWN"
         data_found = "Available" if detailed_data.get("opa") else "Unavailable"
         opa = detailed_data.get("opa")
         if opa:
@@ -54,7 +54,18 @@ with st.form("input_pii", clear_on_submit=False):
         df_emails = pd.DataFrame(detailed_data["email"])
         df_nik = pd.DataFrame(detailed_data["nik"])
         df_pln = pd.DataFrame(detailed_data["pln"])
-        df_addresses = pd.DataFrame(addresses_list)
+        address_shared = detailed_data["address"]
+        list_addresses = []
+        for address in addresses_list:
+            address_id = address["address_id"]
+            list_by_address_id = [x for x in address_shared if x["address_id"] == address_id]
+            names = ",".join([masking_name(x["name"]) for x in list_by_address_id])
+            opas = ",".join([masking_name(x["opa_id"]) for x in list_by_address_id])
+            names = names if names != "" else "-"
+            opas = opas if opas != "" else "-"
+            list_addresses.append({**address, **{"name": names, "opa_id": opas}})
+
+        df_addresses = pd.DataFrame(list_addresses)
 
         if len(df_connected_phone.columns) > 0:
             df_connected_phone = df_connected_phone.loc[:, ["name", "connected_by", "id_connected", "opa_id"]]
@@ -67,10 +78,6 @@ with st.form("input_pii", clear_on_submit=False):
         if len(df_nik.columns) > 0:
             df_nik = df_nik.loc[df_nik.opa_id != opa["opa_id"]]
             df_nik["name"] = df_nik.name.apply(masking_name)
-
-        if len(df_pln.columns) > 0:
-            df_pln = df_pln.loc[df_pln.opa_id != opa["opa_id"]]
-            df_pln["name"] = df_pln.name.apply(masking_name)
 
         if len(df_pln.columns) > 0:
             df_pln = df_pln.loc[df_pln.opa_id != opa["opa_id"]]
