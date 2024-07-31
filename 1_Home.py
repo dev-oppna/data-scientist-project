@@ -1,8 +1,9 @@
 import streamlit as st
-from projects.poc.utils import get_aggregated, get_detailed, transform_addresses, transform_state_court, get_detailed_retrieve_phone, get_opas_by_address, masking_name
+from projects.poc.utils import transform_date, transform_addresses, get_detailed_retrieve_phone, masking_name
 from projects.utils import add_logo
 import pandas as pd
 import warnings
+import json
 
 warnings.filterwarnings("ignore")
 
@@ -58,7 +59,7 @@ with st.form("input_pii", clear_on_submit=False):
         list_addresses = []
         for address in addresses_list:
             address_id = address["address_id"]
-            list_by_address_id = [x for x in address_shared if x["address_id"] == address_id]
+            list_by_address_id = [json.loads(x) for x in list(set([json.dumps(x) for x in address_shared if x["address_id"] == address_id and x["opa_id"]!= opa["opa_id"]]))]
             names = ",".join([masking_name(x["name"]) for x in list_by_address_id])
             opas = ",".join([x["opa_id"] for x in list_by_address_id])
             names = names if names != "" else "-"
@@ -68,7 +69,7 @@ with st.form("input_pii", clear_on_submit=False):
         df_addresses = pd.DataFrame(list_addresses)
 
         if len(df_connected_phone.columns) > 0:
-            df_connected_phone = df_connected_phone.loc[:, ["name", "connected_by", "id_connected", "opa_id"]]
+            df_connected_phone = df_connected_phone.loc[:, ["phone", "name", "connected_by", "id_connected", "opa_id"]]
             df_connected_phone["name"] = df_connected_phone.name.apply(masking_name)
 
         if len(df_emails.columns) > 0:
@@ -82,6 +83,12 @@ with st.form("input_pii", clear_on_submit=False):
         if len(df_pln.columns) > 0:
             df_pln = df_pln.loc[df_pln.opa_id != opa["opa_id"]]
             df_pln["name"] = df_pln.name.apply(masking_name)
+
+        if len(df_addresses.columns) > 0:
+            df_addresses = df_addresses.loc[:, ["address_id", "address_domicile", "name", "province_domicile", "city_domicile", "district_domicile", "created_date", "updated_date", "opa_id"]]
+            df_addresses = df_addresses.sort_values("updated_date", ascending=False)
+            df_addresses["created_date"] = df_addresses.created_date.apply(transform_date)
+            df_addresses["updated_date"] = df_addresses.updated_date.apply(transform_date)
         
         st.write("Linked Phones Details")
         st.dataframe(df_connected_phone, use_container_width=True)

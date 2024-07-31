@@ -96,6 +96,15 @@ def masking_name(name: str) -> str:
     name = name.split()
     name = [masking_static(x) for x in name]
     return " ".join(name)
+
+def transform_date(date: str) -> str:
+    if date:
+        json_month = {1:'Jan', 2:'Feb', 3:'Mar', 4:'Apr', 5:'May', 6:'Jun', 7:'Jul', 8:'Aug', 9:'Sep', 10:'Oct', 11:'Nov', 12:'Dec'}
+        split_date = date.split("-")
+        year = split_date[0]
+        month = json_month[int(split_date[1])]
+        return f"{month} {year}"
+    return date
     
 def transform_state_court(data: list) -> list:
     data_list = []
@@ -108,5 +117,5 @@ def transform_state_court(data: list) -> list:
     return data_list
 
 def transform_addresses(data: list) -> list:
-    data = [{k:l for k,l in x.items() if k not in ["completeness_level", "address_quality_score"]} for x in data]
+    data = [{k:l for k,l in x.items() if k not in ["building_name_address", "road_address", "block_address", "number_address", "rt_address", "rw_address", "remarks", "meta_loaded_at", "completeness_level", "address_quality_score"]} for x in data]
     return data
