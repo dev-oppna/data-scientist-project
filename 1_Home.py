@@ -60,7 +60,7 @@ with st.form("input_pii", clear_on_submit=False):
             address_id = address["address_id"]
             list_by_address_id = [x for x in address_shared if x["address_id"] == address_id]
             names = ",".join([masking_name(x["name"]) for x in list_by_address_id])
-            opas = ",".join([masking_name(x["opa_id"]) for x in list_by_address_id])
+            opas = ",".join([x["opa_id"] for x in list_by_address_id])
             names = names if names != "" else "-"
             opas = opas if opas != "" else "-"
             list_addresses.append({**address, **{"name": names, "opa_id": opas}})
