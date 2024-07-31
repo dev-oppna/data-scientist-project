@@ -29,14 +29,16 @@ if "load_state" not in st.session_state:
     st.session_state.filename = None
 
 data = None
-st.header("Enriching users data in seconds with AI - User Verifications")
-st.write('''By Phone opa''')
+st.markdown("<span style='color:red'>**Demo Version**</span>", unsafe_allow_html=True)
+st.header("Enriching users data in seconds with AI")
+st.caption('Disclaimer: This page is for demonstration purposes only, showcasing the Data Input and Output of our product. In a real scenario, our product can be accessed via API calls integrated with your system.')
+st.write('''Enter User Information*''')
 with st.form("input_pii", clear_on_submit=False):
     col01, col02, col03 = st.columns(3)
-    name = col01.text_input("Full Name", key="name")
-    phone = col02.text_input("Phone or Opa Id (Required)", key="phone", placeholder="628XXXXXX/67762xxx")
-    nik = col03.text_input("NIK", key="nik")
-    submit_data = st.form_submit_button("Search this data")
+    name = col01.text_input("Full Name /Name /Nickname", key="name")
+    phone = col02.text_input("Phone or Opa Id (Mandatory)", key="phone", placeholder="628XXXXXX/67762xxx")
+    nik = col03.text_input("Citizen ID (Optional)", key="nik")
+    submit_data = st.form_submit_button("Search")
     if submit_data and name and phone:
         st.session_state.aggregated_state = True
         with st.spinner(text="Searching your data..."):
@@ -44,12 +46,14 @@ with st.form("input_pii", clear_on_submit=False):
         addresses_list = transform_addresses(detailed_data["addresses"])
         st.subheader("Details data")
         same_person = "NOT KNOWN"
-        data_found = "Available" if detailed_data.get("opa") else "Unavailable"
+        data_found = "TRUE" if detailed_data.get("opa") else "FALSE"
         opa = detailed_data.get("opa")
         if opa:
             same_person = "TRUE" if opa.get("name_similarity") > 0.7 else "FALSE"
         
-        is_same_person = st.text_input("Is same person", key="is_same_person", value=same_person, disabled=True)
+        col1, col2 = st.columns(2)
+        is_same_person = col1.text_input("Is Name Matched?", key="is_same_person", value=same_person, disabled=True)
+        is_data_found = col2.text_input("Is Data Found?", key="is_data_found", value=data_found, disabled=True)
 
         df_connected_phone = pd.DataFrame(detailed_data["summary"])
         df_emails = pd.DataFrame(detailed_data["email"])
@@ -71,7 +75,8 @@ with st.form("input_pii", clear_on_submit=False):
         if len(df_connected_phone.columns) > 0:
             df_connected_phone = df_connected_phone.loc[:, ["phone", "name", "connected_by", "id_connected", "opa_id"]]
             df_connected_phone["name"] = df_connected_phone.name.apply(masking_name)
-
+            df_connected_phone.columns = ["Connected Phone", "Connected Name", "Connected By", "Connected ID", "Opa ID"]
+            
         if len(df_emails.columns) > 0:
             df_emails = df_emails.loc[df_emails.opa_id != opa["opa_id"]]
             df_emails["name"] = df_emails.name.apply(masking_name)
@@ -87,23 +92,30 @@ with st.form("input_pii", clear_on_submit=False):
         if len(df_addresses.columns) > 0:
             df_addresses = df_addresses.loc[:, ["address_id", "address_domicile", "name", "province_domicile", "city_domicile", "district_domicile", "created_date", "updated_date", "opa_id"]]
             df_addresses = df_addresses.sort_values("updated_date", ascending=False)
-            df_addresses["created_date"] = df_addresses.created_date.apply(transform_date)
-            df_addresses["updated_date"] = df_addresses.updated_date.apply(transform_date)
+            df_addresses.columns = ["Connected ID", "Offline Presence", "Connected Name", "Province", "City", "District", "Created", "Updated", "Opa ID"]
+            df_addresses["Created"] = df_addresses.Created.apply(transform_date)
+            df_addresses["Updated"] = df_addresses.Updated.apply(transform_date)
         
-        st.write("Linked Phones Details")
+        st.write("Is User has Connections?")
         st.dataframe(df_connected_phone, use_container_width=True)
 
-        st.write("Available Addresses Details (10 latest address used by the user)")
-        st.dataframe(df_addresses.head(10), use_container_width=True)
+        st.write("Is User Has Offline Presence ?")
+        st.dataframe(df_addresses, use_container_width=True)
 
-        st.write("NIK Connected Details")
-        st.dataframe(df_nik, use_container_width=True)
+        # st.write("NIK Connected Details")
+        # st.dataframe(df_nik, use_container_width=True)
 
-        st.write("Emails Connected Details")
-        st.dataframe(df_emails, use_container_width=True)
+        # st.write("Emails Connected Details")
+        # st.dataframe(df_emails, use_container_width=True)
 
-        st.write("PLN Connected Details")
-        st.dataframe(df_pln, use_container_width=True)
+        # st.write("PLN Connected Details")
+        # st.dataframe(df_pln, use_container_width=True)
         
     elif submit_data:
         st.warning('Please fill the required field', icon="⚠️")   
+st.caption('''How to use this platform:
+- **Name**                    : Enter your user “Name” as submitted on this platform.\n
+- **Phone Number**            : Enter your user “phone number” as submitted on this platform. You can also use your OPA ID for this field.\n
+- **Citizen ID (Optional)**   : If you choose to provide it, enter a valid NIK.\n
+- **Click 'Search'** to find information about the user submitted. By clicking this, you confirm that data retrieval has received user consent.
+''')
