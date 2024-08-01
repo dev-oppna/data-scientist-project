@@ -48,9 +48,12 @@ with st.form("input_pii", clear_on_submit=False):
         same_person = "NOT KNOWN"
         data_found = "TRUE" if detailed_data.get("opa") else "FALSE"
         opa = detailed_data.get("opa")
+        opa_id = ""
         if opa:
             same_person = "TRUE" if opa.get("name_similarity") > 0.7 else "FALSE"
+            opa_id = opa.get("opa_id", "")
         
+        st.write(opa_id)
         col1, col2 = st.columns(2)
         is_same_person = col1.text_input("Is Name Matched?", key="is_same_person", value=same_person, disabled=True)
         is_data_found = col2.text_input("Is Data Found?", key="is_data_found", value=data_found, disabled=True)
