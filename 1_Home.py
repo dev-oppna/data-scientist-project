@@ -58,6 +58,7 @@ with st.form("input_pii", clear_on_submit=False):
         is_same_person = col1.text_input("Is Name Matched?", key="is_same_person", value=same_person, disabled=True)
         is_data_found = col2.text_input("Is Data Found?", key="is_data_found", value=data_found, disabled=True)
 
+        # st.write(detailed_data["summary"])
         df_connected_phone = pd.DataFrame(detailed_data["summary"])
         df_emails = pd.DataFrame(detailed_data["email"])
         df_nik = pd.DataFrame(detailed_data["nik"])

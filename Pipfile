@@ -21,6 +21,8 @@ altair = "*"
 matplotlib = "*"
 jaro-winkler = "*"
 numpy = "*"
+pandas = "*"
+validators = "*"
 
 [dev-packages]
 
