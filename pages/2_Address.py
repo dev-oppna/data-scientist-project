@@ -61,7 +61,7 @@ with st.form("input_pii", clear_on_submit=False):
             district_ = c1.text_input("District", key="district_", value=detailed_data["district"], disabled=True)
             city_ = c2.text_input("City", key="city_", value=detailed_data["city"], disabled=True)
             province_ = c3.text_input("Province", key="province_", value=detailed_data["province"], disabled=True)
-            confidence_level = c3.text_input("Confidence Level", key="confidence_level", value=detailed_data["confidence_level"], disabled=True)
+            confidence_level = c4.text_input("Confidence Level", key="confidence_level", value=detailed_data["confidence_level"], disabled=True)
 
             c1_, c2_ = st.columns(2)
             category = c1_.text_input("Category", key="category", value=detailed_data["category"], disabled=True)
