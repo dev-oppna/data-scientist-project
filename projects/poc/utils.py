@@ -69,6 +69,24 @@ def get_detailed_retrieve_phone(name: str, phone: str) -> dict:
     except Exception as e:
         return {"addresses": [], "summary": [], "address": [], "email": [], "nik": [], "pln": []}
     
+def get_address_verification_validation(phone: str, address: str, district:str, city:str, poi:str, radius:int) -> dict:
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = json.dumps({
+        "phone": phone,
+        "address": f"{address}, {district}, {city}",
+        "poi": poi,
+        "radius": int(radius)
+    })
+    ses = requests.session()
+    try:
+        resp = ses.post(f"{base_url}/v1/marlins", headers=headers, data=data)
+        response = resp.json()
+        return response["data"]
+    except Exception as e:
+        return {}
+    
 def get_opas_by_address(address_id: str) -> dict:
     headers = {
         "Content-Type": "application/json"
