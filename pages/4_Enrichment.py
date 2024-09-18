@@ -47,21 +47,19 @@ with st.form("input_pii", clear_on_submit=False):
             detailed_data = get_enrichment(opa_id=generate_opa_id(phone), name=name)
         if detailed_data.get("code") == "01":
             dat_ = detailed_data["data"]
+            i = 1
             for key, val in MAPPING.items():
                 st.write(key)
                 for v in val:
                     st.text_input(v.title(), key=v, value=str(dat_.get(v, "")), disabled=True)
+                i += 1
         else:
             st.write("Not Found")
         
     elif submit_data:
         st.warning('Please fill the required field', icon="⚠️")   
 st.caption('''How to use this platform:
-- **Phone number**            : Enter your user “phone number” as submitted on this platform.\n
-- **Free text address**   : Your user free text address including road name, rt, rw, number, etc.\n
-- **District name**   : Your user address district name.\n
-- **City name**   : Your user address city name.\n
-- **POI**   : Point of Interest that you want to search in area of address.\n
-- **Radius**   : Radius POI you want to search.\n
-- **Click 'Search'** to get verification and validation about the user data that submitted. By clicking this, you confirm that data retrieval has received user consent.
+- **Phone**            : Enter your user “phone number” as submitted on this platform.\n
+- **Name**   : Your user name to check the similarity of the name.\n
+- **Click 'Search'** to get information about the user data that submitted. By clicking this, you confirm that data retrieval has received user consent.
 ''')

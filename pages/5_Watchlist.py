@@ -1,11 +1,8 @@
 import streamlit as st
-from projects.poc.utils import transform_date, transform_addresses, get_address_verification_validation, masking_name
 from projects.watchlist.utils import get_watchlist
-from projects.poc import DICT_CITY, LIST_CITY
 from projects.utils import add_logo
 import pandas as pd
 import warnings
-import json
 
 warnings.filterwarnings("ignore")
 
@@ -35,7 +32,46 @@ st.markdown("<span style='color:red'>**Demo Version**</span>", unsafe_allow_html
 st.header("Check your user in multiple digital footprint")
 st.caption('Disclaimer: This page is for demonstration purposes only, showcasing the Data Input and Output of our product. In a real scenario, our product can be accessed via API calls integrated with your system.')
 st.write('''Enter User Information*''')
-location = st.selectbox("Location", LIST_CITY, key="location")
+
+LIST_LOCATIONS = [
+ '*',
+ 'Aceh',
+ 'Bandung',
+ 'Bangka Belitung',
+ 'Bantul',
+ 'Bengkulu',
+ 'Bogor',
+ 'Cibinong',
+ 'Cikarang',
+ 'Cirebon',
+ 'Gorontalo',
+ 'Gresik',
+ 'Jakarta Barat',
+ 'Jakarta Pusat',
+ 'Jakarta Selatan',
+ 'Jakarta Timur',
+ 'Jakarta Utara',
+ 'Jambi',
+ 'Kota Bekasi',
+ 'Kota Semarang',
+ 'Kota Surabaya',
+ 'Kupang',
+ 'Makassar',
+ 'Malang',
+ 'Manado',
+ 'Medan',
+ 'Padang',
+ 'Palangkaraya',
+ 'Palembang',
+ 'Pekanbaru',
+ 'Pematang Siantar',
+ 'Pontianak',
+ 'Purwakarta',
+ 'Sukabumi',
+ 'Tangerang',
+ 'Tasikmalaya']
+
+location = st.selectbox("Location", LIST_LOCATIONS, key="location")
 
 with st.form("input_pii", clear_on_submit=False):
     col01, col02 = st.columns(2)
@@ -44,7 +80,7 @@ with st.form("input_pii", clear_on_submit=False):
     phone = col01.text_input("Phone (Mandatory)", key="phone", placeholder="628XXXXXX/67762xxx")
     email = col01.text_input("Email", key="email", placeholder="test@gmail.com")
 
-    nik = col02.text_input("NIK", key="nik", placeholder="3171xxxx")
+    nik = col02.text_input("Citizen ID", key="nik", placeholder="3171xxxx")
     dob = col02.text_input("DOB", key="dob", placeholder="1998-10-10")
     
     submit_data = st.form_submit_button("Search")
@@ -81,11 +117,11 @@ with st.form("input_pii", clear_on_submit=False):
     elif submit_data:
         st.warning('Please fill the required field', icon="⚠️")   
 st.caption('''How to use this platform:
+- **Name**   : Your user name to check the similarity of the name.\n
 - **Phone number**            : Enter your user “phone number” as submitted on this platform.\n
-- **Free text address**   : Your user free text address including road name, rt, rw, number, etc.\n
-- **District name**   : Your user address district name.\n
-- **City name**   : Your user address city name.\n
-- **POI**   : Point of Interest that you want to search in area of address.\n
-- **Radius**   : Radius POI you want to search.\n
-- **Click 'Search'** to get verification and validation about the user data that submitted. By clicking this, you confirm that data retrieval has received user consent.
+- **Citizen ID (Optional)**   : If you choose to provide it, enter a valid NIK.\n
+- **DOB (Optional)**   : If you choose to provide it, enter a valid date of birth informationwith format YYYY-MM-DD.\n
+- **Email (Optional)**   : If you choose to provide it, enter a valid email.\n
+- **Location**   : Choose location from list we provided.\n
+- **Click 'Search'** to get information about your user from public data. By clicking this, you confirm that data retrieval has received user consent.
 ''')
