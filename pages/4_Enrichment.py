@@ -1,6 +1,5 @@
 import streamlit as st
-from projects.look_a_like.utils import generate_opa_id
-from projects.enrichment.utils import get_enrichment
+from projects.enrichment.utils import generate_opa_id, get_enrichment, MAPPING
 from projects.poc import DICT_CITY, LIST_CITY
 from projects.utils import add_logo
 import pandas as pd
@@ -48,6 +47,10 @@ with st.form("input_pii", clear_on_submit=False):
             detailed_data = get_enrichment(opa_id=generate_opa_id(phone), name=name)
         if detailed_data.get("code") == "01":
             dat_ = detailed_data["data"]
+            for key, val in MAPPING.items():
+                st.write(key)
+                for v in val:
+                    st.text_input(v.title(), key=v, value=str(dat_.get(v, "")), disabled=True)
         else:
             st.write("Not Found")
         
