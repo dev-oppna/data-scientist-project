@@ -98,7 +98,7 @@ with st.form("input_pii", clear_on_submit=False):
             
             st.write("State Court")
             if state_court != []:
-                state_court = [y for x in state_court for y in x["data"]]
+                state_court = [y for x in state_court for y in x.get("data")]
             df_court = pd.DataFrame(state_court)
             st.dataframe(df_court, use_container_width=True)
 
