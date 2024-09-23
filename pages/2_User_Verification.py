@@ -1,9 +1,27 @@
 import streamlit as st
-from projects.poc.utils import transform_date, transform_addresses, get_detailed_retrieve_phone, masking_name
+from projects.poc.utils import transform_date, transform_addresses, get_detailed_retrieve_phone, masking_name, get_detailed_link_analysis
 from projects.utils import add_logo
+from st_link_analysis import st_link_analysis, NodeStyle, EdgeStyle
 import pandas as pd
 import warnings
 import json
+
+node_styles = [
+    NodeStyle("OPA", "#2A629B", "name", "person"),
+    NodeStyle("EMAIL", "#F79767", "name", "email"),
+    NodeStyle("ADDRESS", "#309A60", "name", "place"),
+    NodeStyle("PLN", "#F7EA00", "name", "swap_horiz"),
+    NodeStyle("NIK", "#C7E8F3", "name", "badge"),
+]
+
+edge_styles = [
+    EdgeStyle("HAS", labeled=True, directed=False),
+    EdgeStyle("TRANSFER_TO", labeled=True, directed=True),
+    EdgeStyle("RELATED_TO", labeled=True, directed=False)
+]
+
+layout = {"name": "cose", "animate": "end", "nodeDimensionsIncludeLabels": False}
+
 
 warnings.filterwarnings("ignore")
 
@@ -32,6 +50,8 @@ data = None
 st.markdown("<span style='color:red'>**Demo Version**</span>", unsafe_allow_html=True)
 st.header("Enriching users data in seconds with AI")
 st.caption('Disclaimer: This page is for demonstration purposes only, showcasing the Data Input and Output of our product. In a real scenario, our product can be accessed via API calls integrated with your system.')
+
+
 st.write('''Enter User Information*''')
 with st.form("input_pii", clear_on_submit=False):
     col01, col02, col03 = st.columns(3)
@@ -105,6 +125,13 @@ with st.form("input_pii", clear_on_submit=False):
 
         st.write("Is User Has Offline Presence ?")
         st.dataframe(df_addresses, use_container_width=True)
+
+        if opa_id != "":
+            with st.spinner(text="Get your graphs..."):
+                elements = get_detailed_link_analysis(opa_id)  
+            st_link_analysis(
+                elements, node_styles=node_styles, edge_styles=edge_styles, layout=layout, key="xyz"
+            )
 
         # st.write("NIK Connected Details")
         # st.dataframe(df_nik, use_container_width=True)

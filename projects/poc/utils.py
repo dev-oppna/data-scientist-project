@@ -137,3 +137,21 @@ def transform_state_court(data: list) -> list:
 def transform_addresses(data: list) -> list:
     data = [{k:l for k,l in x.items() if k not in ["building_name_address", "road_address", "block_address", "number_address", "rt_address", "rw_address", "remarks", "meta_loaded_at", "completeness_level", "address_quality_score"]} for x in data]
     return data
+        
+def get_detailed_link_analysis(opa: str) -> dict:
+    headers = {
+        "Content-Type": "application/json"
+    }
+    data = json.dumps({
+        "opa_id": opa,
+    })
+    ses = requests.session()
+    try:
+        resp = ses.post(f"{base_url}/v1/guardians/relations", headers=headers, data=data, timeout=60)
+        response = resp.json()
+        if response["data"]:
+            return response["data"]
+        else:
+            return {"nodes": [], "edges": []}
+    except Exception as e:
+        return {"nodes": [], "edges": []}
