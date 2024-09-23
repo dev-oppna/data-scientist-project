@@ -17,6 +17,7 @@ def get_watchlist(name: str, phone: str, nik: str, email:str, dob:str, location:
         "dob": dob,
         "location": location
     })
+    
     ses = requests.session()
     try:
         resp = ses.post(f"{base_url}/v1/panthers", headers=headers, data=data)
