@@ -27,15 +27,15 @@ def generate_opa_id(phone:str) -> str:
 
 def get_persona(data: dict) -> str:
     if data.get("practical_spender"):
-        return "practical_spender"
+        return "Practical Spender"
     elif data.get("affordable_avant_garde"):
-        return "affordable_avant_garde"
+        return "Affordable Avant Garde"
     elif data.get("professional_fulfillment_seeker"):
-        return "professional_fulfillment_seeker"
+        return "Professional Fulfillment Seeker"
     elif data.get("noble_guardian"):
-        return "noble_guardian"
+        return "Noble Guardian"
     elif data.get("opulent_way_of_living"):
-        return "opulent_way_of_living"
+        return "Opulent Way of Living"
     return None
 
 MAPPING = {
