@@ -25,6 +25,19 @@ def generate_opa_id(phone:str) -> str:
     opa_id = "67762" + hash_phone + phone[-4:]
     return opa_id
 
+def get_persona(data: dict) -> str:
+    if data.get("practical_spender"):
+        return "practical_spender"
+    elif data.get("affordable_avant_garde"):
+        return "affordable_avant_garde"
+    elif data.get("professional_fulfillment_seeker"):
+        return "professional_fulfillment_seeker"
+    elif data.get("noble_guardian"):
+        return "noble_guardian"
+    elif data.get("opulent_way_of_living"):
+        return "opulent_way_of_living"
+    return None
+
 MAPPING = {
     'Demographic': [
         'opa_id',
