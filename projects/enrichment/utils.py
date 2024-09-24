@@ -97,17 +97,10 @@ MAPPING = {
         'midas_investor',
         'cinephile'],
     'Behavior': [
-        'last_digital_presence',
         'engaged_shopper',
         'recently_traveled',
-        'fintech_familiarity_normal_users',
-        'fintech_familiarity_hidden_gems',
-        'fintech_familiarity_fintech_literate',
-        'fintech_familiarity_fintech_savvy',
-        'digital_presence_chronic',
-        'digital_presence_sick',
-        'digital_presence_need_attention',
-        'digital_presence_healthy',
+        'fintech_familiarity_category',
+        'customer_health_score_category',
         'cltv_monthly_12_months',
         'recently_has_child',
         'recently_decorate_renovate',
@@ -124,9 +117,5 @@ MAPPING = {
         'prefer_high_value_goods',
         'prefer_mid_to_high_value_goods',
         'prefer_mid_to_low_value_goods',
-        'prefer_low_value_goods',
-        'intensity',
-        'digital_footprint',
-        'momentum',
-        'clumpiness']
+        'prefer_low_value_goods']
     }
