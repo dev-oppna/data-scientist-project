@@ -72,8 +72,7 @@ MAPPING = {
         'predicted_medium_self_care_owner',
         'predicted_high_class_computer_owner',
         'predicted_high_class_health_product',
-        'predicted_high_class_household_owner',
-        'social_commerce_user'],
+        'predicted_high_class_household_owner'],
     'Affinities': [
         'auto_geek',
         'digital_shopper',
