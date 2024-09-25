@@ -1,5 +1,5 @@
 import streamlit as st
-from projects.poc.utils import transform_date, transform_addresses, get_address_verification_validation, masking_name
+from projects.poc.utils import transform_date, transform_addresses, get_address_verification_validation, masking_name, get_formatted
 from projects.poc import DICT_CITY, LIST_CITY
 from projects.utils import add_logo
 import pandas as pd
@@ -53,7 +53,7 @@ with st.form("input_pii", clear_on_submit=False):
             detailed_data = get_address_verification_validation(phone=phone, address=address, district=district, city=city, poi=poi, radius=radius)
         if detailed_data.get("lon"):
             c1, c2, c3, c4 = st.columns(4)
-            address_ = st.text_input("Formatted Address", key="address_", value=f"{detailed_data['lon']},{detailed_data['lat']}", disabled=True)
+            address_ = st.text_input("Formatted Address", key="address_", value=f"{get_formatted(detailed_data, detailed_data['district'], detailed_data['city'], detailed_data['province'])}", disabled=True)
             longlat = c1.text_input("Long Lat", key="longlat", value=f"{detailed_data['lon']},{detailed_data['lat']}", disabled=True)
             street = c2.text_input("Street", key="street", value=detailed_data["road_name"], disabled=True)
             rt = c3.text_input("RT", key="rt", value=detailed_data["rt"], disabled=True)

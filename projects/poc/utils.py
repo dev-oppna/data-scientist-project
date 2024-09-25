@@ -155,3 +155,20 @@ def get_detailed_link_analysis(opa: str) -> dict:
             return {"nodes": [], "edges": []}
     except Exception as e:
         return {"nodes": [], "edges": []}
+
+
+def construct_address(data, district, city):
+    blok = f"blok {data['block']}" if data["block"] != "" else ""
+    remarks = f"{data['remark']}" if data["remark"] != "" else ""
+    nomor = f"no {data['number']}" if data["number"] != "" else ""
+    rt = f"rt {data['rt']}" if data["rt"] != "" else ""
+    rw = f"rw {data['rw']}" if data["rw"] != "" else ""
+    if data['road_name'] != "":
+        address = f"jalan {data['road_name']} {blok} {nomor} {remarks} {district} {city}"
+    else:
+        address = f"{blok} {nomor} {rt} {rw} {district} {city}"
+    address = " ".join(address.split())
+    return address.strip()
+
+def get_formatted(data, district, city, province):  
+    return (f"{data['building_name']} " + construct_address(data, district, city) + f" {province}").strip().lower()
