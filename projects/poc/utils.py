@@ -4,13 +4,13 @@ import os
 
 base_url = "https://api-stg.oppna.dev"
 token = os.getenv('token')
-auth = os.getenv('auth')
+basic = os.getenv('basic')
 
 def get_aggregated(name: str, nik: str, phone: str, address: str, email: str, city: str, district: str) -> dict:
     headers = {
         "Content-Type": "application/json",
         "Token": token,
-        "Authorization": f"Basic {auth}"
+        "Authorization": f"Basic {basic}"
     }
     data = json.dumps({
         "name": name,
@@ -33,7 +33,7 @@ def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> d
     headers = {
         "Content-Type": "application/json",
         "Token": token,
-        "Authorization": f"Basic {auth}"
+        "Authorization": f"Basic {basic}"
     }
     data = json.dumps({
         "name": name,
@@ -56,7 +56,7 @@ def get_detailed_retrieve_phone(name: str, phone: str) -> dict:
     headers = {
         "Content-Type": "application/json",
         "Token": token,
-        "Authorization": f"Basic {auth}"
+        "Authorization": f"Basic {basic}"
     }
     data = json.dumps({
         "name": name,
@@ -100,7 +100,7 @@ def get_opas_by_address(address_id: str) -> dict:
     headers = {
         "Content-Type": "application/json",
         "Token": token,
-        "Authorization": f"Basic {auth}"
+        "Authorization": f"Basic {basic}"
     }
     data = json.dumps({
         "address_id": address_id
@@ -153,7 +153,7 @@ def get_detailed_link_analysis(opa: str) -> dict:
     headers = {
         "Content-Type": "application/json",
         "Token": token,
-        "Authorization": f"Basic {auth}"
+        "Authorization": f"Basic {basic}"
     }
     data = json.dumps({
         "opa_id": opa,
