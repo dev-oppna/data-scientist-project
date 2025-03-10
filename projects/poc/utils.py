@@ -1,11 +1,16 @@
 import requests
 import json
+import os
 
 base_url = "https://api-stg.oppna.dev"
+token = os.getenv('token')
+auth = os.getenv('auth')
 
 def get_aggregated(name: str, nik: str, phone: str, address: str, email: str, city: str, district: str) -> dict:
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Token": token,
+        "Authorization": f"Basic {auth}"
     }
     data = json.dumps({
         "name": name,
@@ -26,7 +31,9 @@ def get_aggregated(name: str, nik: str, phone: str, address: str, email: str, ci
 
 def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> dict:
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Token": token,
+        "Authorization": f"Basic {auth}"
     }
     data = json.dumps({
         "name": name,
@@ -47,7 +54,9 @@ def get_detailed(name: str, nik: str, phone: str, address: str, email: str) -> d
     
 def get_detailed_retrieve_phone(name: str, phone: str) -> dict:
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Token": token,
+        "Authorization": f"Basic {auth}"
     }
     data = json.dumps({
         "name": name,
@@ -89,7 +98,9 @@ def get_address_verification_validation(phone: str, address: str, district:str, 
     
 def get_opas_by_address(address_id: str) -> dict:
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Token": token,
+        "Authorization": f"Basic {auth}"
     }
     data = json.dumps({
         "address_id": address_id
@@ -140,7 +151,9 @@ def transform_addresses(data: list) -> list:
         
 def get_detailed_link_analysis(opa: str) -> dict:
     headers = {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Token": token,
+        "Authorization": f"Basic {auth}"
     }
     data = json.dumps({
         "opa_id": opa,
