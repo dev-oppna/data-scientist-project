@@ -7,7 +7,7 @@ def get_watchlist(name: str, phone: str, nik: str, email:str, dob:str, location:
     headers = {
         "Content-Type": "application/json",
         "Authorization": "Basic b3BwbmE6b3BwbmFwYXNzd29yZDEyMw==",
-        "Hmac": "6f9e4ebb7e868aa084788dd576337057afef823d3402ba5fd2fb135b6947c29d"
+        "Token": "6f9e4ebb7e868aa084788dd576337057afef823d3402ba5fd2fb135b6947c29d"
     }
     data = json.dumps({
         "name" : name,
