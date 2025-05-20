@@ -91,10 +91,17 @@ with st.form("input_pii", clear_on_submit=False):
         if detailed_data.get("code") == "01":
             data = detailed_data.get('data', {})
             state_court = data.get("state court", [])
-            pep = data.get("political party member", {})
+            pep = data.get("political party member", [])
             social_media = data.get("social media", [])
-            state_officials = data.get("state officials", {})
+            state_officials = data.get("state officials", [])
             kabinet = data.get("kabinet", [])
+            dpr = data.get("dpr", [])
+            dpd = data.get("dpd", [])
+            dprd = data.get("dprd", [])
+            dprd_kab = data.get("dprd kabupaten kota", [])
+            dprd_prov = data.get("dprd provinsi", [])
+            
+
             
             st.write("State Court")
             if state_court != []:
@@ -102,10 +109,10 @@ with st.form("input_pii", clear_on_submit=False):
             df_court = pd.DataFrame(state_court)
             st.dataframe(df_court, use_container_width=True)
 
-            st.write("Political Exposed Person")
-            pep = [] if pep == {} else [pep]
-            state_officials = [] if state_officials == {} else [state_officials]
-            df_pep = pd.DataFrame(kabinet+pep+state_officials)
+            # st.write("Political Exposed Person")
+            # pep = [] if pep == {} else [pep]
+            # state_officials = [] if state_officials == {} else [state_officials]
+            df_pep = pd.DataFrame(kabinet + pep + state_officials + dpr + dpd + dprd + dprd_kab + dprd_prov)
             st.dataframe(df_pep, use_container_width=True)
 
             st.write("Social Media")
