@@ -10,7 +10,7 @@ def get_watchlist(name: str, phone: str, nik: str, email:str, dob:str, location:
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Basic {basic_panthers}",
-        "Token": {token_panthers}
+        "Token": token_panthers
     }
     data = json.dumps({
         "name" : name,
