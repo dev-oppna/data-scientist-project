@@ -109,7 +109,7 @@ with st.form("input_pii", clear_on_submit=False):
             df_court = pd.DataFrame(state_court)
             st.dataframe(df_court, use_container_width=True)
 
-            # st.write("Political Exposed Person")
+            st.write("Political Exposed Person")
             # pep = [] if pep == {} else [pep]
             # state_officials = [] if state_officials == {} else [state_officials]
             df_pep = pd.DataFrame(kabinet + pep + state_officials + dpr + dpd + dprd + dprd_kab + dprd_prov)
