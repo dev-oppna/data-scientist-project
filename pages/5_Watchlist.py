@@ -100,8 +100,14 @@ with st.form("input_pii", clear_on_submit=False):
             dprd = data.get("dprd", [])
             dprd_kab = data.get("dprd kabupaten kota", [])
             dprd_prov = data.get("dprd provinsi", [])
+            dttot = data.get("dttot", [])
+            interpol_yellow = data.get("interpol yellow", [])
+            interpol_red = data.get("interpol red", [])
+            sanction = data.get("sanction list", [])
             
-
+            st.write("Search Person")
+            df_search = pd.DataFrame(dttot + interpol_yellow + interpol_red + sanction)
+            st.dataframe(df_search, use_container_width=True)
             
             st.write("State Court")
             if state_court != []:
